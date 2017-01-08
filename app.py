@@ -27,6 +27,21 @@ def webhook():
     r.headers['Content-Type'] = 'application/json'
     return r
 
+@app.route('/smarthome', methods=['POSTs'])
+def smarthome():
+    req = request.get_json(silent=True, force=True)
+
+    print("Request:")
+    print(json.dumps(req, indent=4))
+
+    res = makeWebhookResult(req)
+
+    res = json.dumps(res, indent=4)
+    print(res)
+    r = make_response(res)
+    r.headers['Content-Type'] = 'application/json'
+    return r
+
 def makeWebhookResult(req):
     if req.get("result").get("action") != "shipping.cost":
         return {}
