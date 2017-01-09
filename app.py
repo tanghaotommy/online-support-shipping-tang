@@ -55,14 +55,28 @@ def makeResponse(req):
 		"Type": "OpenDoor"
 		}
 		r = requests.post("http://localhost/order.php", data=json.dumps(content))
-    	speech = "Your front door is opened!"
+		if r.json().get("Status") == 0:
+			speech = "Your front door is opened!"
+		else:
+			speech = "Sorry, I meet some errors. Please try again later!"
+
+	if action == "action.sendalert":
+		print("Send Alert!")
+		content = {
+		"Type": "SendAlert"
+		}
+		r = requests.post("http://localhost/order.php", data=json.dumps(content))
+		if r.json().get("Status") == 0:
+			speech = "I have set the beep running!"
+		else:
+			speech = "Sorry, I meet some errors. Please try again later!"
 
 	if action == "status.all":
 		print("Check current status")
 		content = {
 		"Type": "HomeStatus"
 		}
-		r = requests.post("http://localhost/order.php", data=json.dumps(content))
+		r = requests.post("http://localhost/status.php", data=json.dumps(content))
 		if r.json().get("Status") == 0:
 			speech = "Your home is all right!"
 			res["data"] = r.json().get("Content")
