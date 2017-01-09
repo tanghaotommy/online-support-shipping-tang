@@ -79,6 +79,7 @@ def makeResponse(req):
     	}
   		}
 		res["facebook"] = facebook
+		return res;
 
 	if action == "status.all":
 		print("Check current status")
