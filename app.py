@@ -70,6 +70,16 @@ def makeResponse(req):
 			speech = "I have set the beep running!"
 		else:
 			speech = "Sorry, I meet some errors. Please try again later!"
+		facebook = {
+  		"facebook": {
+    	"attachment": {
+      		"type": "image",
+      		"payload": {
+        		"url": "http://54.183.198.179/UploadedFaceImages/1483855032.jpg"
+      		}
+    	}
+  		}
+		}
 
 	if action == "status.all":
 		print("Check current status")
