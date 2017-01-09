@@ -71,6 +71,7 @@ def makeResponse(req):
 		else:
 			speech = "Sorry, I meet some errors. Please try again later!"
 		facebook = {
+  		"facebook": {
     	"attachment": {
       		"type": "image",
       		"payload": {
@@ -78,8 +79,8 @@ def makeResponse(req):
       		}
     	}
   		}
-		res["facebook"] = facebook
-		return res;
+		}
+		res["data"] = facebook
 
 	if action == "status.all":
 		print("Check current status")
