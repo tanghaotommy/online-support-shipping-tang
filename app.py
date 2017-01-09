@@ -72,7 +72,6 @@ def makeResponse(req):
 			speech = "Sorry, I meet some errors. Please try again later!"
 		facebook = {
   		"facebook": {
-  		"text": speech,
     	"attachment": {
       		"type": "image",
       		"payload": {
