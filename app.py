@@ -82,6 +82,65 @@ def makeResponse(req):
 		}
 		res["data"] = facebook
 
+	if action == "action.viewphoto":
+		print("ViewPhoto!")
+		content = {
+			"Type": "ViewPhoto"
+		}
+		r = requests.post("http://localhost/order.php", data=json.dumps(content))
+		if r.json().get("Status") == 0:
+			if r.json().get("Content").get("Name") != "null":
+				speech = "Oh, " + r.json().get("Content").get("Name") + "is at your front door!"
+			else:
+				speech = "There is currently nobody at your front door!"
+
+			facebook = {
+  				"facebook": {
+    			"attachment": {
+      				"type": "image",
+      			"payload": {
+        			"url": r.json().get('Content').get('url')
+      			}
+    		}
+  			}
+			}
+			res["data"] = facebook
+		else:
+			speech = "Sorry, I meet some errors. Please try again later!"
+
+	if action == "action.viewvideo":
+		print("ViewVideo!")
+		content = {
+			"Type": "ViewVideo"
+		}
+		r = requests.post("http://localhost/order.php", data=json.dumps(content))
+		if r.json().get("Status") == 0:
+			speech = "Here is a short video of your front door!"
+			facebook = {
+  				"facebook": {
+    			"attachment": {
+      				"type": "video",
+      			"payload": {
+        			"url": r.json().get('Content').get('url')
+      			}
+    		}
+  			}
+			}
+			res["data"] = facebook
+		else:
+			speech = "Sorry, I meet some errors. Please try again later!"
+
+	if action == "action.sendalert":
+		print("Send Alert!")
+		content = {
+		"Type": "SendAlert"
+		}
+		r = requests.post("http://localhost/order.php", data=json.dumps(content))
+		if r.json().get("Status") == 0:
+			speech = "I have set the beep running!"
+		else:
+			speech = "Sorry, I meet some errors. Please try again later!"
+		
 	if action == "status.all":
 		print("Check current status")
 		content = {
