@@ -80,7 +80,6 @@ def makeResponse(req):
 			res["contextOut"] = [{"name":"register", "lifespan":2}]
 		else:
 			speech = "Sorry, I meet some errors. Please try again later!"
-		res["data"] = facebook
 
 	if action == "action.viewphoto":
 		print("ViewPhoto!")
