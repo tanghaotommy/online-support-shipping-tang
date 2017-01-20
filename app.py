@@ -50,6 +50,19 @@ def makeResponse(req):
 	parameters = result.get("parameters")
 	res = {}
 
+	if action == "action.register":
+		print("New user registers!")
+		content = {
+			"Type": "register",
+			"Id": facebook_userId
+		}
+		r = requests.post("http://localhost/register.php", data=json.dumps(content))
+		response = r.json()
+		if response.get("Status") == 0:
+			speech = "You have successfully registered! Welcome, I am now your home assistant! What Can I do for you?"
+		else:
+			speech = "Sorry, I meet some errors. Please try again later!"
+			
 	if action == "action.openfrontdoor":
 		print("Open Front Door!")
 		content = {
