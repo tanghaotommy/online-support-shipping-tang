@@ -46,17 +46,23 @@ def smarthome():
 def makeResponse(req):
 	action = req.get("result").get("action")
 	result = req.get("result")
+	facebook_userId = req.get("sessionId")
 	parameters = result.get("parameters")
 	res = {}
 
 	if action == "action.openfrontdoor":
 		print("Open Front Door!")
 		content = {
-		"Type": "OpenDoor"
+		"Type": "OpenDoor",
+		"Id": facebook_userId
 		}
 		r = requests.post("http://localhost/order.php", data=json.dumps(content))
-		if r.json().get("Status") == 0:
+		response = r.json()
+		if response.get("Status") == 0:
 			speech = "Your front door is opened!"
+		elif response.get("Status") == 2:
+			speech = "Oh, it seems your are not registered yet. Do you want to register right now?"
+			res["contextOut"] = [{"name":"register", "lifespan":2}]
 		else:
 			speech = "Sorry, I meet some errors. Please try again later!"
 
@@ -66,20 +72,14 @@ def makeResponse(req):
 		"Type": "SendAlert"
 		}
 		r = requests.post("http://localhost/order.php", data=json.dumps(content))
-		if r.json().get("Status") == 0:
+		response = r.json()
+		if response.get("Status") == 0:
 			speech = "I have set the beep running!"
+		elif response.get("Status") == 2:
+			speech = "Oh, it seems your are not registered yet. Do you want to register right now?"
+			res["contextOut"] = [{"name":"register", "lifespan":2}]
 		else:
 			speech = "Sorry, I meet some errors. Please try again later!"
-		facebook = {
-  		"facebook": {
-    	"attachment": {
-      		"type": "image",
-      		"payload": {
-        		"url": "http://54.183.198.179/UploadedFaceImages/1483855032.jpg"
-      		}
-    	}
-  		}
-		}
 		res["data"] = facebook
 
 	if action == "action.viewphoto":
@@ -87,10 +87,12 @@ def makeResponse(req):
 		content = {
 			"Type": "ViewPhoto"
 		}
-		r = requests.post("http://localhost/order.php", data=json.dumps(content))
-		if r.json().get("Status") == 0:
-			if r.json().get("Content").get("Name") != "null":
-				speech = "Oh, " + r.json().get("Content").get("Name") + "is at your front door!"
+		r = requests.post("http://54.183.198.179/order.php", data=json.dumps(content))
+		print r.json()
+		response = r.json()
+		if response.get("Status") == 0:
+			if response.get("Content").get("Name") != "null":
+				speech = "Oh, " + response.get("Content").get("Name") + "is at your front door!"
 			else:
 				speech = "There is currently nobody at your front door!"
 
@@ -99,12 +101,15 @@ def makeResponse(req):
     			"attachment": {
       				"type": "image",
       			"payload": {
-        			"url": r.json().get('Content').get('url')
+        			"url": response.get('Content').get('url')
       			}
     		}
   			}
 			}
 			res["data"] = facebook
+		elif response.get("Status") == 2:
+			speech = "Oh, it seems your are not registered yet. Do you want to register right now?"
+			res["contextOut"] = [{"name":"register", "lifespan":2}]
 		else:
 			speech = "Sorry, I meet some errors. Please try again later!"
 
@@ -114,7 +119,8 @@ def makeResponse(req):
 			"Type": "ViewVideo"
 		}
 		r = requests.post("http://localhost/order.php", data=json.dumps(content))
-		if r.json().get("Status") == 0:
+		response = r.json()
+		if response.get("Status") == 0:
 			speech = "Here is a short video of your front door!"
 			facebook = {
   				"facebook": {
@@ -127,6 +133,9 @@ def makeResponse(req):
   			}
 			}
 			res["data"] = facebook
+		elif response.get("Status") == 2:
+			speech = "Oh, it seems your are not registered yet. Do you want to register right now?"
+			res["contextOut"] = [{"name":"register", "lifespan":2}]
 		else:
 			speech = "Sorry, I meet some errors. Please try again later!"
 
@@ -136,8 +145,12 @@ def makeResponse(req):
 		"Type": "SendAlert"
 		}
 		r = requests.post("http://localhost/order.php", data=json.dumps(content))
-		if r.json().get("Status") == 0:
+		response = r.json()
+		if response.get("Status") == 0:
 			speech = "I have set the beep running!"
+		elif response.get("Status") == 2:
+			speech = "Oh, it seems your are not registered yet. Do you want to register right now?"
+			res["contextOut"] = [{"name":"register", "lifespan":2}]
 		else:
 			speech = "Sorry, I meet some errors. Please try again later!"
 		
@@ -147,9 +160,13 @@ def makeResponse(req):
 		"Type": "HomeStatus"
 		}
 		r = requests.post("http://localhost/status.php", data=json.dumps(content))
-		if r.json().get("Status") == 0:
+		response = r.json()
+		if response.get("Status") == 0:
 			speech = "Your home is all right!"
 			res["data"] = r.json().get("Content")
+		elif response.get("Status") == 2:
+			speech = "Oh, it seems your are not registered yet. Do you want to register right now?"
+			res["contextOut"] = [{"name":"register", "lifespan":2}]
 		else:
 			speech = "Sorry, I meet some errors. Please try again later!"
 
@@ -160,9 +177,13 @@ def makeResponse(req):
 			"Type": "TurnOffLight",
 			}
 			r = requests.post("http://localhost/order.php", data=json.dumps(content))
-			if r.json().get("Status") == 0:
+			response = r.json()
+			if response.get("Status") == 0:
 				print("Turn off the lights!")
 				speech = "I have turned off the lights!"
+			elif response.get("Status") == 2:
+				speech = "Oh, it seems your are not registered yet. Do you want to register right now?"
+				res["contextOut"] = [{"name":"register", "lifespan":2}]
 			else:
 				speech = "Sorry, I meet some errors. Please try again later!"
 		else:
@@ -171,9 +192,13 @@ def makeResponse(req):
 			"Location": location
 			}
 			r = requests.post("http://localhost/order.php", data=json.dumps(content))
-			if r.json().get("Status") == 0:
+			response = r.json()
+			if response.get("Status") == 0:
 				print("Turn off the lights!" + location)
 				speech = "I have turned off the lights in the " + location + " !"
+			elif response.get("Status") == 2:
+				speech = "Oh, it seems your are not registered yet. Do you want to register right now?"
+				res["contextOut"] = [{"name":"register", "lifespan":2}]
 			else:
 				speech = "Sorry, I meet some errors. Please try again later!"
 
@@ -184,9 +209,13 @@ def makeResponse(req):
 			"Type": "TurnOnLight",
 			}
 			r = requests.post("http://localhost/order.php", data=json.dumps(content))
-			if r.json().get("Status") == 0:
+			response = r.json()
+			if response.get("Status") == 0:
 				print("Turn on the lights!")
 				speech = "I have turned on the lights!"
+			elif response.get("Status") == 2:
+				speech = "Oh, it seems your are not registered yet. Do you want to register right now?"
+				res["contextOut"] = [{"name":"register", "lifespan":2}]
 			else:
 				speech = "Sorry, I meet some errors. Please try again later!"
 		else:
@@ -195,9 +224,13 @@ def makeResponse(req):
 			"Location": location
 			}
 			r = requests.post("http://localhost/order.php", data=json.dumps(content))
-			if r.json().get("Status") == 0:
+			response = r.json()
+			if response.get("Status") == 0:
 				print("Turn on the lights!" + location)
 				speech = "I have turned on the lights in the " + location + " !"
+			elif response.get("Status") == 2:
+				speech = "Oh, it seems your are not registered yet. Do you want to register right now?"
+				res["contextOut"] = [{"name":"register", "lifespan":2}]
 			else:
 				speech = "Sorry, I meet some errors. Please try again later!"
 
