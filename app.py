@@ -69,7 +69,8 @@ def makeResponse(req):
 	if action == "action.sendalert":
 		print("Send Alert!")
 		content = {
-		"Type": "SendAlert"
+		"Type": "SendAlert",
+		"Id": facebook_userId
 		}
 		r = requests.post("http://localhost/order.php", data=json.dumps(content))
 		response = r.json()
@@ -84,7 +85,8 @@ def makeResponse(req):
 	if action == "action.viewphoto":
 		print("ViewPhoto!")
 		content = {
-			"Type": "ViewPhoto"
+			"Type": "ViewPhoto",
+			"Id": facebook_userId
 		}
 		r = requests.post("http://54.183.198.179/order.php", data=json.dumps(content))
 		print r.json()
@@ -115,7 +117,8 @@ def makeResponse(req):
 	if action == "action.viewvideo":
 		print("ViewVideo!")
 		content = {
-			"Type": "ViewVideo"
+			"Type": "ViewVideo",
+			"Id": facebook_userId
 		}
 		r = requests.post("http://localhost/order.php", data=json.dumps(content))
 		response = r.json()
@@ -141,7 +144,8 @@ def makeResponse(req):
 	if action == "action.sendalert":
 		print("Send Alert!")
 		content = {
-		"Type": "SendAlert"
+		"Type": "SendAlert",
+		"Id": facebook_userId
 		}
 		r = requests.post("http://localhost/order.php", data=json.dumps(content))
 		response = r.json()
@@ -156,7 +160,8 @@ def makeResponse(req):
 	if action == "status.all":
 		print("Check current status")
 		content = {
-		"Type": "HomeStatus"
+		"Type": "HomeStatus",
+		"Id": facebook_userId
 		}
 		r = requests.post("http://localhost/status.php", data=json.dumps(content))
 		response = r.json()
@@ -174,6 +179,7 @@ def makeResponse(req):
 		if location == "":
 			content = {
 			"Type": "TurnOffLight",
+			"Id": facebook_userId
 			}
 			r = requests.post("http://localhost/order.php", data=json.dumps(content))
 			response = r.json()
@@ -188,6 +194,7 @@ def makeResponse(req):
 		else:
 			content = {
 			"Type": "TurnOffLight",
+			"Id": facebook_userId,
 			"Location": location
 			}
 			r = requests.post("http://localhost/order.php", data=json.dumps(content))
@@ -206,6 +213,7 @@ def makeResponse(req):
 		if location == "":
 			content = {
 			"Type": "TurnOnLight",
+			"Id": facebook_userId
 			}
 			r = requests.post("http://localhost/order.php", data=json.dumps(content))
 			response = r.json()
@@ -220,6 +228,7 @@ def makeResponse(req):
 		else:
 			content = {
 			"Type": "TurnOnLight",
+			"Id": facebook_userId,
 			"Location": location
 			}
 			r = requests.post("http://localhost/order.php", data=json.dumps(content))
