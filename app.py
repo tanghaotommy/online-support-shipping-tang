@@ -59,6 +59,7 @@ def makeResponse(req):
 		print content
 		r = requests.post("http://localhost/register.php", data=json.dumps(content))
 		response = r.json()
+		print response
 		if response.get("Status") == 0:
 			speech = "You have successfully registered! Welcome, I am now your home assistant! What Can I do for you?"
 		else:
