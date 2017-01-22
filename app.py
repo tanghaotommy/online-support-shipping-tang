@@ -56,6 +56,7 @@ def makeResponse(req):
 			"Type": "register",
 			"Id": facebook_userId
 		}
+		print content
 		r = requests.post("http://localhost/register.php", data=json.dumps(content))
 		response = r.json()
 		if response.get("Status") == 0:
