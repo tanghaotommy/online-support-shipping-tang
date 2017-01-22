@@ -46,7 +46,7 @@ def smarthome():
 def makeResponse(req):
 	action = req.get("result").get("action")
 	result = req.get("result")
-	facebook_userId = req.get("sessionId")
+	facebook_userId = str(req.get("sessionId"))
 	parameters = result.get("parameters")
 	res = {}
 
