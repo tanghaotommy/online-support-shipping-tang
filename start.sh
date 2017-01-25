@@ -1,8 +1,16 @@
 #!/bin/sh
-if [ -e "nohup.out" ]
+echo "Starting..."
+num=`ps -ef | grep 'app.py' | grep -v grep | wc -l`
+if [ -e "log" ]
 then
-    rm nohup.out
+    rm log
 fi
-nohup python app.py &
-echo $! > ./app.pid
+if [ $num == 0 ]
+then
+    nohup python -u app.py >log 2>&1 &
+    echo $! > ./app.pid
+    echo 'Started!'
+else
+    echo 'Already running!'
+fi
 exit 0

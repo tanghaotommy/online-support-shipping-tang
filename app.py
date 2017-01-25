@@ -9,6 +9,8 @@ from flask import Flask
 from flask import request
 from flask import make_response
 
+import logging
+
 # Flask app should start in global layout
 app = Flask(__name__)
 
@@ -107,22 +109,7 @@ def makeResponse(req):
 		print r.json()
 		response = r.json()
 		if response.get("Status") == 0:
-			if response.get("Content").get("Name") != "null":
-				speech = "Oh, " + response.get("Content").get("Name") + "is at your front door!"
-			else:
-				speech = "There is currently nobody at your front door!"
-
-			facebook = {
-  				"facebook": {
-    			"attachment": {
-      				"type": "image",
-      			"payload": {
-        			"url": response.get('Content').get('url')
-      			}
-    		}
-  			}
-			}
-			res["data"] = facebook
+			speech = "Sure! Wait a moment, picture is on its way!"
 		elif response.get("Status") == 2:
 			speech = "Oh, it seems your are not registered yet. Do you want to register right now?"
 			res["contextOut"] = [{"name":"register", "lifespan":2}]
@@ -291,6 +278,15 @@ def makeWebhookResult(req):
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
+
+    # logging.basicConfig(level=logging.DEBUG,
+    #             format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+    #             datefmt='%a, %d %b %Y %H:%M:%S',
+    #             filename='app.log',
+    #             filemode='w')
+    # logging.debug('This is debug message')
+    # logging.info('This is info message')
+    # logging.warning('This is warning message')
 
     print "Starting app on port %d" % port
 
