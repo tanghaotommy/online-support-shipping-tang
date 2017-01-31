@@ -52,6 +52,21 @@ def makeResponse(req):
 	parameters = result.get("parameters")
 	res = {}
 
+	if action == "action.uploadphoto":
+		print("Add face picture to training set!")
+		content = {
+			"Type": "AddFace",
+			"Id": facebook_userId
+		}
+		print content
+		r = requests.post("http://localhost/order.php", data=json.dumps(content))
+		response = r.json()
+		print response
+		if response.get("Status") == 0:
+			speech = "I have added this photo to the database. Our facial recognition is more precise ever before!"
+		else:
+			speech = "Sorry, I meet some errors. Please try again later!"
+
 	if action == "action.register":
 		print("New user registers!")
 		content = {
