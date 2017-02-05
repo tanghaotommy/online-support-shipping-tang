@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 #coding:utf-8
-
 import urllib
 import json
 import os
@@ -14,7 +13,7 @@ import logging
 
 # Flask app should start in global layout
 app = Flask(__name__)
-
+print ('嘿嘿')
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -53,9 +52,9 @@ def restaurantsRec():
     print("Request:")
     print(json.dumps(req, indent=4))
 
-    res = makeResponse(req)
+    res = makeResponse2(req)
 
-    res = json.dumps(res, indent=4)
+    #res = json.dumps(res, indent=4)
     print(res)
     r = make_response2(res)
     r.headers['Content-Type'] = 'application/json'
