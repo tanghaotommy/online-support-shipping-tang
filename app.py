@@ -50,7 +50,7 @@ def restaurantsRec():
     req = request.get_json(silent=True, force=True)
 
     print("Request:")
-    print(json.dumps(req, indent=4, ensure_ascii=False))
+    print(json.dumps(req, indent=4))
 
     res = makeResponse2(req)
 
