@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#coding:utf-8
 
 import urllib
 import json
@@ -44,6 +45,42 @@ def smarthome():
     r = make_response(res)
     r.headers['Content-Type'] = 'application/json'
     return r
+
+@app.route('/restaurantsRec', methods=['POST'])
+def restaurantsRec():
+    req = request.get_json(silent=True, force=True)
+
+    print("Request:")
+    print(json.dumps(req, indent=4))
+
+    res = makeResponse(req)
+
+    res = json.dumps(res, indent=4)
+    print(res)
+    r = make_response2(res)
+    r.headers['Content-Type'] = 'application/json'
+    return r
+
+def makeResponse2(req):
+	action = req.get("result").get("action")
+	result = req.get("result")
+	facebook_userId = str(req.get("sessionId"))
+	parameters = result.get("parameters")
+	res = {}
+	if action == 'query.restaurants':
+		speech = "你喜欢什么类型的菜？"
+	if action == 'query.restaurants.location':
+		speech = "能把你的位置发送给我嘛？"
+	if action == 'query.restaurants.taste':
+		speech = "正在寻找中，请稍等！"
+
+	print("Response:" + str(speech))
+	res["speech"] = speech
+	res["displayText"] = speech
+	res["source"] = "shokse-restaurants-recommendation"
+
+	return res;
+
 
 def makeResponse(req):
 	action = req.get("result").get("action")
