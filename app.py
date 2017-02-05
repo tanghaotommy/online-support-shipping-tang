@@ -50,11 +50,11 @@ def restaurantsRec():
     req = request.get_json(silent=True, force=True)
 
     print("Request:")
-    print(json.dumps(req, indent=4))
+    print(json.dumps(req, indent=4, ensure_ascii=False))
 
     res = makeResponse2(req)
 
-    res = json.dumps(res, indent=4)
+    res = json.dumps(res, indent=4, ensure_ascii=False)
     print(res)
     r = make_response(res)
     r.headers['Content-Type'] = 'application/json'
@@ -66,12 +66,15 @@ def makeResponse2(req):
 	facebook_userId = str(req.get("sessionId"))
 	parameters = result.get("parameters")
 	res = {}
+	speech = '出错啦！！！'
 	if action == 'query.restaurants':
 		speech = "你喜欢什么类型的菜？"
 	if action == 'query.restaurants.location':
 		speech = "能把你的位置发送给我嘛？"
 	if action == 'query.restaurants.taste':
 		speech = "正在寻找中，请稍等！"
+	if action == 'query.restaurants.unknownLocation':
+		speech = result.get('resolvedQuery')
 
 	print("Response:" + str(speech))
 	res["speech"] = speech
