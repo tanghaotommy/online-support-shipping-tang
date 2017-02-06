@@ -139,8 +139,9 @@ def makeResponse2(req):
 		if(mysql.connect(mysql_config) == None):
 			speech = 'Success'
 			schema = ['id', 'name_en', 'name_cn', 'rating', 'type']
-			mysql.query("SELECT * FROM Restaurants", schema)
+			results = mysql.query("SELECT * FROM Restaurants", schema)
 			mysql.close()
+			speech = "我们给你推荐" + results[0]['name_cn']
 		else:
 			speech = 'Database Error'
 
