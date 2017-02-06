@@ -29,7 +29,7 @@ answers_query_restaurants = ['你喜欢哪种口味的菜？', '你喜欢哪种�
 answers_query_restaurants_location = ['好的，请稍等！正在搜寻中！']
 answers_query_restaurants_taste = ['好的，%s是个很棒的选择哦。那你能告诉我你的位置么？这\
 样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。']
-answers_query_restaurants_unknownLocation = ['请问是%d嘛？']
+answers_query_restaurants_unknownLocation = ['请问是%s嘛？']
 
 class Mysql(object):
 
