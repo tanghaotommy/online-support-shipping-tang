@@ -8,6 +8,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
 
+import random
 from flask import Flask
 from flask import request
 from flask import make_response
@@ -23,6 +24,12 @@ mysql_config = config = {
   'host': 'mysql.cii5tvbuf3ji.us-west-1.rds.amazonaws.com',
   'database': 'RestaurantsRecommendation'
 }
+
+answers_query_restaurants = ['你喜欢哪种口味的菜？', '你喜欢哪种风格的菜？']
+answers_query_restaurants_location = ['好的，请稍等！正在搜寻中！']
+answers_query_restaurants_taste = ['好的，%s是个很棒的选择哦。那你能告诉我你的位置么？这\
+样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。']
+answers_query_restaurants_unknownLocation = ['请问是%d嘛？']
 
 class Mysql(object):
 
@@ -128,23 +135,43 @@ def makeResponse2(req):
 	facebook_userId = str(req.get("sessionId"))
 	parameters = result.get("parameters")
 	res = {}
+	print action
 	speech = '出错啦！！！'
+
 	if action == 'query.restaurants':
-		speech = "你喜欢什么类型的菜？"
+		speech = answers_query_restaurants[randint(0, len(answers_query_restaurants))]
+		print '123'
+
 	if action == 'query.restaurants.location':
-		speech = "能把你的位置发送给我嘛？"
+		speech = answers_query_restaurants_location[0]
+
 	if action == 'query.restaurants.taste':
-		speech = "正在寻找中，请稍等！"
+		speech = answers_query_restaurants_taste[0] % (parameters.get('taste'),)
+
 	if action == 'query.restaurants.unknownLocation':
+		print 'big error'
+		speech = answers_query_restaurants_unknownLocation[0] % (result.get('resolvedQuery'),)
+		print 'big error2'
+		res["contextOut"] = [
+      	{
+        "name": "user_asks4_restaurants_withUnknownLocation",
+        "parameters": {
+          "location.original": result.get('resolvedQuery'),
+        },
+        "lifespan": 3
+      	}]
+      	print 'bigerror 3'
+
+	if action == 'query.restaurants.show':
 		mysql = Mysql()
 		if(mysql.connect(mysql_config) == None):
-			speech = 'Success'
-			schema = ['id', 'name_en', 'name_cn', 'rating', 'type']
+			schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address']
 			results = mysql.query("SELECT * FROM Restaurants", schema)
 			mysql.close()
-			speech = "我们给你推荐" + results[0]['name_cn']
+			speech = "我们给你推荐" + results[0]['name_cn'] + "。它在这里" + results[0]['address']
 		else:
-			speech = 'Database Error'
+			speech = '哎呀！数据库出了点小问题！等我下！'
+		
 
 		#speech = result.get('resolvedQuery')
 
