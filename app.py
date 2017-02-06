@@ -4,7 +4,9 @@ import urllib
 import json
 import os
 import requests
-
+import sys
+reload(sys)
+sys.setdefaultencoding( "utf-8" )
 
 from flask import Flask
 from flask import request
