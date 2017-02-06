@@ -5,11 +5,72 @@ import json
 import os
 import requests
 
+
 from flask import Flask
 from flask import request
 from flask import make_response
 
 import logging
+
+import mysql.connector
+#from mysql.connector import errorcode
+
+mysql_config = config = {
+  'user': 'root',
+  'password': 'password',
+  'host': 'mysql.cii5tvbuf3ji.us-west-1.rds.amazonaws.com',
+  'database': 'RestaurantsRecommendation'
+}
+
+class Mysql(object):
+
+	def connect(self, config):
+		try:
+		  self.cnx = mysql.connector.connect(**config)
+		  return None
+		except err:
+			print err
+			self.cnx = None
+			return err
+		else:
+		  self.cnx.close()
+		  self.cnx = None
+		  return 0
+
+	def close(self):
+		if self.cnx: self.cnx.close(); self.cnx=None;
+
+	def query(self, query,schema=None):
+		cursor = self.cnx.cursor()
+
+		cursor.execute(query)
+		result = []
+		for i, row in enumerate(cursor):
+			if schema == None:
+				result.append(row)
+			else:
+				dict = {}
+				for j, column in enumerate(row):
+					print j
+					print column
+					if j >= len(schema):
+						break
+					if isinstance(column, unicode):
+						dict[schema[j]] = column.encode('utf-8')
+					else:
+						dict[schema[j]] = column
+				result.append(dict)
+				print result[0]['name_cn']
+
+		print result
+		# for (first_name, last_name, hire_date) in cursor:
+		#   print("{}, {} was hired on {:%d %b %Y}".format(
+		#     last_name, first_name, hire_date))
+
+		cursor.close()
+	def __del__(self):
+		if self.cnx: self.cnx.close(); self.cnx=None;
+
 
 # Flask app should start in global layout
 app = Flask(__name__)
@@ -74,7 +135,16 @@ def makeResponse2(req):
 	if action == 'query.restaurants.taste':
 		speech = "正在寻找中，请稍等！"
 	if action == 'query.restaurants.unknownLocation':
-		speech = result.get('resolvedQuery')
+		mysql = Mysql()
+		if(mysql.connect(mysql_config) == None):
+			speech = 'Success'
+			schema = ['id', 'name_en', 'name_cn', 'rating', 'type']
+			mysql.query("SELECT * FROM Restaurants", schema)
+			mysql.close()
+		else:
+			speech = 'Database Error'
+
+		#speech = result.get('resolvedQuery')
 
 	print("Response:" + str(speech))
 	res["speech"] = speech
