@@ -62,14 +62,13 @@ class Mysql(object):
 					else:
 						dict[schema[j]] = column
 				result.append(dict)
-				print result[0]['name_cn']
-
 		print result
 		# for (first_name, last_name, hire_date) in cursor:
 		#   print("{}, {} was hired on {:%d %b %Y}".format(
 		#     last_name, first_name, hire_date))
 
 		cursor.close()
+		return result
 	def __del__(self):
 		if self.cnx: self.cnx.close(); self.cnx=None;
 
