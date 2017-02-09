@@ -290,7 +290,7 @@ def makeResponse2(req):
 		if current < context["parameters"]["max"] - 1:
 			mysql = Mysql()
 			mysql.connect(mysql_config)
-			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (current), schema)[0]
+			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), schema)[0]
 			mysql.close()
 
 			LatA = item["latitude"]
@@ -298,15 +298,15 @@ def makeResponse2(req):
 			LatB = user_location["location"]["location"]["lat"]
 			LngB = user_location["location"]["location"]["lng"]
 
-			distance = distance(LatA, LngA, LatB, LngB)
-			speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(distance) + "km。\n 你喜欢嘛？"
+			_distance = distance(LatA, LngA, LatB, LngB)
+			speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(_distance) + "km。\n 你喜欢嘛？"
 			context["parameters"]["current"] = current
 		else:
 			current = 0
 			context["parameters"]["current"] = 0
 			mysql = Mysql()
 			mysql.connect(mysql_config)
-			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (current), schema)[0]
+			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), schema)[0]
 			mysql.close()
 
 			LatA = item["latitude"]
@@ -314,15 +314,16 @@ def makeResponse2(req):
 			LatB = user_location["location"]["location"]["lat"]
 			LngB = user_location["location"]["location"]["lng"]
 
-			distance = distance(LatA, LngA, LatB, LngB)
-			speech = "我没有更多的啦，只能从头再开始一遍咯！\n我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(distance) + "km。\n 你喜欢嘛？"
+			_distance = distance(LatA, LngA, LatB, LngB)
+			speech = "我没有更多的啦，只能从头再开始一遍咯！\n我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(_distance) + "km。\n 你喜欢嘛？"
 	
 	if action == 'query.restaurants.moreInformation':
 		context = findContext(result["contexts"], "restaurants_recommended")
+		lists = context["parameters"]["lists"]
 		current = context["parameters"]["current"]
 		mysql = Mysql()
 		mysql.connect(mysql_config)
-		item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (current), schema)[0]
+		item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), schema)[0]
 		mysql.close()
 
 		res["contextOut"] = clearContexts(result.get("contexts"))
