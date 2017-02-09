@@ -310,7 +310,7 @@ def makeResponse2(req):
 			contextOut = [{"name": "restaurants_recommended", "parameters": context["parameters"], "lifespan": 3}]
 			res["contextOut"] = clearContexts(result.get("contexts"))
 			res["contextOut"].extend(contextOut)
-			
+
 			mysql = Mysql()
 			mysql.connect(mysql_config)
 			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), schema)[0]
@@ -330,6 +330,8 @@ def makeResponse2(req):
 		current = context["parameters"]["current"]
 		mysql = Mysql()
 		mysql.connect(mysql_config)
+		schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
+'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
 		item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), schema)[0]
 		mysql.close()
 
