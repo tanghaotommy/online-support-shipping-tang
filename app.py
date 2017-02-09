@@ -146,6 +146,11 @@ def distance(LatA, LngA, LatB, LngB):
 	distance = R * c
 	return round(distance, 1)
 
+def clearContexts(contexts):
+	for context in contexts:
+		context["lifespan"] = 0
+	return contexts
+
 def makeResponse2(req):
 	action = req.get("result").get("action")
 	result = req.get("result")
@@ -156,7 +161,20 @@ def makeResponse2(req):
 	speech = '出错啦！！！'
 
 	if action == 'query.restaurants':
-		speech = answers_query_restaurants[random.randint(0, len(answers_query_restaurants))]
+		if result.has_key["contexts"]: res["contextOut"] = clearContexts(result.get("contexts"))
+		if not (parameters["taste"] == ""):
+			speech = answers_query_restaurants_taste[0] % (parameters.get('taste'))
+			contextOut = [{"name": "user_asks4_restaurants_withtaste", "parameters": {
+          "taste.original": "",
+          "taste": parameters["taste"]
+        },
+        "lifespan": 3}]
+			if not (res["contextOut"] == ""):
+				res["contextOut"].extend(contextOut)
+			else:
+				res["contextOut"] = {"contextOut": contextOut}
+		else: 
+			speech = answers_query_restaurants[random.randint(0, len(answers_query_restaurants))]
 		print '123'
 
 	if action == 'query.restaurants.location':
@@ -192,8 +210,8 @@ def makeResponse2(req):
 					LngA = context['parameters']['location']['location']['lng']
 					break
 
-			print 'LatA' + str(LatA)
-			print 'LngA' + str(LngA)
+			# print 'LatA' + str(LatA)
+			# print 'LngA' + str(LngA)
 			distance_map = {}
 			for row in results:
 				LatB = row['latitude']
@@ -205,10 +223,10 @@ def makeResponse2(req):
 
 			mysql.connect(mysql_config)
 			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (sorted_key_list[0]), schema)[0]
-			print sorted_key_list[0]
-			print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
-			print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
-			print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
+			# print sorted_key_list[0]
+			# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
+			# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
+			# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
 			speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(distance_map[sorted_key_list[0]]) + "km。\n 你喜欢嘛？"
 		else:
 			speech = '哎呀！数据库出了点小问题！等我下！'
