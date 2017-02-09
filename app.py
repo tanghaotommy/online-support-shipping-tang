@@ -175,7 +175,7 @@ def makeResponse2(req):
 				res["contextOut"] = {"contextOut": contextOut}
 		else: 
 			speech = answers_query_restaurants[random.randint(0, len(answers_query_restaurants))]
-			contextOut = [{"name": "user_asks4_restaurants", "parameters": {
+			contextOut = [{"name": "user_asks4_restaurantsrec", "parameters": {
 			"taste.original": "",
 			"taste": ""
 			},
