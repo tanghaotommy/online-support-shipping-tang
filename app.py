@@ -147,7 +147,7 @@ def makeResponse2(req):
 	speech = '出错啦！！！'
 
 	if action == 'query.restaurants':
-		speech = answers_query_restaurants[randint(0, len(answers_query_restaurants))]
+		speech = answers_query_restaurants[random.randint(0, len(answers_query_restaurants))]
 		print '123'
 
 	if action == 'query.restaurants.location':
@@ -166,20 +166,9 @@ def makeResponse2(req):
 		if res['status'] == 'OK':
 			formatted_address = res['results'][0]['formatted_address']
 			speech = answers_query_restaurants_unknownLocation[0] % (formatted_address)
-			res["contextOut"] = [
-      		{
-        	"name": "user_asks4_restaurants_withUnknownLocation",
-        	"parameters": {
-        	"location.original": result.get('resolvedQuery'), 
-          	"location": 
-          		{
-          			'formatted_address': formatted_address,
-          			'location': res['results'][0]['geometry']['location']},
-        		},
-        	"lifespan": 3
-      		}]
-      	else:
-      		speech = answers_query_restaurants_unknownLocation[1]
+			res["contextOut"] = [{"name": "user_asks4_restaurants_withUnknownLocation","parameters": {"location.original": result.get('resolvedQuery'), "location": {'formatted_address': formatted_address,'location': res['results'][0]['geometry']['location']},},"lifespan": 3}]
+		else:
+			speech = answers_query_restaurants_unknownLocation[1]
 
 	if action == 'query.restaurants.show':
 		mysql = Mysql()
