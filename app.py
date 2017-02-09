@@ -201,8 +201,8 @@ def makeResponse2(req):
 
 			sorted_key_list = sorted(distance_map, key=distance_map.get)
 
-			speech = "我们给您推荐" + results[sorted_key_list[0]]['name_cn'] + 
-			"。它在这里" + results[sorted_key_list[0]]['address'] + '\n' + "您距离它有" + 
+			speech = "我们给您推荐" + results[sorted_key_list[0]]['name_cn'] +
+			"。它在这里" + results[sorted_key_list[0]]['address'] + '\n' + "您距离它有" +
 			str(distance_map[sorted_key_list[0]]) + "km"
 		else:
 			speech = '哎呀！数据库出了点小问题！等我下！'
