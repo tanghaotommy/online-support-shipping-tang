@@ -4,7 +4,9 @@ import urllib
 import json
 import os
 import requests
+import re
 import sys
+import math
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
 
@@ -14,10 +16,10 @@ from flask import request
 from flask import make_response
 
 import logging
-
 import mysql.connector
 #from mysql.connector import errorcode
 
+GOOGLEMAPS_API_KEY = "AIzaSyABcAARrYGpUs-9PCD1B7tdl3tMaxGHBZU"
 mysql_config = config = {
   'user': 'root',
   'password': 'password',
@@ -29,7 +31,7 @@ answers_query_restaurants = ['你喜欢哪种口味的菜？', '你喜欢哪种�
 answers_query_restaurants_location = ['好的，请稍等！正在搜寻中！']
 answers_query_restaurants_taste = ['好的，%s是个很棒的选择哦。那你能告诉我你的位置么？这\
 样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。']
-answers_query_restaurants_unknownLocation = ['请问是%s嘛？']
+answers_query_restaurants_unknownLocation = ['请问是%s嘛？', '对不起，我不知道这个是哪里。你能再说一遍么？']
 
 class Mysql(object):
 
@@ -129,6 +131,12 @@ def restaurantsRec():
     r.headers['Content-Type'] = 'application/json'
     return r
 
+def distance(LatA, LngA, LatB, LngB):
+	C = math.sin(LatA)*math.sin(LatB)*math.cos(LngA-LngB) + math.cos(LatA)*math.cos(LatB)
+	R = 6371.004
+	distance = round(R*math.acos(C)*math.pi/180, 1)
+	return distance
+
 def makeResponse2(req):
 	action = req.get("result").get("action")
 	result = req.get("result")
@@ -149,18 +157,29 @@ def makeResponse2(req):
 		speech = answers_query_restaurants_taste[0] % (parameters.get('taste'),)
 
 	if action == 'query.restaurants.unknownLocation':
-		print 'big error'
-		speech = answers_query_restaurants_unknownLocation[0] % (result.get('resolvedQuery'),)
-		print 'big error2'
-		res["contextOut"] = [
-      	{
-        "name": "user_asks4_restaurants_withUnknownLocation",
-        "parameters": {
-          "location.original": result.get('resolvedQuery'),
-        },
-        "lifespan": 3
-      	}]
-      	print 'bigerror 3'
+		address = result.get('resolvedQuery')
+		address = re.sub(" ", '+', address)
+		url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=%s"
+		url = url % (address, GOOGLEMAPS_API_KEY)
+		r = requests.get(url)
+		res = r.json()
+		if res['status'] == 'OK':
+			formatted_address = res['results'][0]['formatted_address']
+			speech = answers_query_restaurants_unknownLocation[0] % (formatted_address)
+			res["contextOut"] = [
+      		{
+        	"name": "user_asks4_restaurants_withUnknownLocation",
+        	"parameters": {
+        	"location.original": result.get('resolvedQuery'), 
+          	"location": 
+          		{
+          			'formatted_address': formatted_address,
+          			'location': res['results'][0]['geometry']['location']},
+        		},
+        	"lifespan": 3
+      		}]
+      	else:
+      		speech = answers_query_restaurants_unknownLocation[1]
 
 	if action == 'query.restaurants.show':
 		mysql = Mysql()
@@ -168,7 +187,23 @@ def makeResponse2(req):
 			schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address']
 			results = mysql.query("SELECT * FROM Restaurants", schema)
 			mysql.close()
-			speech = "我们给你推荐" + results[0]['name_cn'] + "。它在这里" + results[0]['address']
+			for context in result.get('contexts'):
+				if context['name'] == 'user_asks4_restaurants_withUnknownLocation':
+					LatA = context['parameters']['location']['location']['lat']
+					LngA = context['parameters']['location']['location']['lng']
+					break
+
+			distance_map = {}
+			for row in results:
+				LatB = row['latitude']
+				LngB = row['longitude']
+				distance_map[row['id']] = distance(LatA, LngA, LatB, LngB)
+
+			sorted_key_list = sorted(distance_map, key=distance_map.get)
+
+			speech = "我们给您推荐" + results[sorted_key_list[0]]['name_cn'] + 
+			"。它在这里" + results[sorted_key_list[0]]['address'] + '\n' + "您距离它有" + 
+			str(distance_map[sorted_key_list[0]]) + "km"
 		else:
 			speech = '哎呀！数据库出了点小问题！等我下！'
 		
