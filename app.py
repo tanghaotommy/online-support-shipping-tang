@@ -213,7 +213,7 @@ def makeResponse2(req):
 		speech = "好吧，那是哪里呀？"
 		res["contextOut"] = deleteContext(result["contexts"], "user_asks4_restaurants_withunknownlocation")
 		context = findContext(result["contexts"], "user_asks4_restaurants_withtaste")
-		if context and context['lifespan'] <= 0:
+		if context and context['lifespan'] <= 1:
 			speech = "哎呀，你不是好多次啦，我有点笨，所以被搞糊涂了。给我次机会，我们重头再来一次吧！如果地址老是不对你就给我发位置啦！"
 			res["contextOut"] = clearContexts(result.get("contexts"))
 
