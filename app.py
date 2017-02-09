@@ -168,7 +168,6 @@ def extendContext(contexts, name, lifespan):
 def findContext(contexts, name):
 	for context in contexts:
 		if context["name"] == name:
-			context["lifespan"] = lifespan
 			return context
 	return None
 
