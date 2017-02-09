@@ -161,7 +161,7 @@ def makeResponse2(req):
 	speech = '出错啦！！！'
 
 	if action == 'query.restaurants':
-		if result.has_key["contexts"]: res["contextOut"] = clearContexts(result.get("contexts"))
+		if result.has_key("contexts"): res["contextOut"] = clearContexts(result.get("contexts"))
 		if not (parameters["taste"] == ""):
 			speech = answers_query_restaurants_taste[0] % (parameters.get('taste'))
 			contextOut = [{"name": "user_asks4_restaurants_withtaste", "parameters": {
