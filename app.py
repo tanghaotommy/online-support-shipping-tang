@@ -285,12 +285,21 @@ def makeResponse2(req):
 		current = context["parameters"]["current"] + 1
 		schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
 'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
+		
+		user_location = context["parameters"]["user_location"]
 		if current < context["parameters"]["max"] - 1:
 			mysql = Mysql()
 			mysql.connect(mysql_config)
 			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (current), schema)[0]
 			mysql.close()
-			speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(distance_map[sorted_key_list[0]]) + "km。\n 你喜欢嘛？"
+
+			LatA = item["latitude"]
+			LngA = item["longitude"]
+			LatB = user_location["location"]["location"]["lat"]
+			LngB = user_location["location"]["location"]["lng"]
+
+			distance = distance(LatA, LngA, LatB, LngB)
+			speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(distance) + "km。\n 你喜欢嘛？"
 			context["parameters"]["current"] = current
 		else:
 			current = 0
@@ -299,7 +308,14 @@ def makeResponse2(req):
 			mysql.connect(mysql_config)
 			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (current), schema)[0]
 			mysql.close()
-			speech = "我没有更多的啦，只能从头再开始一遍咯！\n我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(distance_map[sorted_key_list[0]]) + "km。\n 你喜欢嘛？"
+
+			LatA = item["latitude"]
+			LngA = item["longitude"]
+			LatB = user_location["location"]["location"]["lat"]
+			LngB = user_location["location"]["location"]["lng"]
+
+			distance = distance(LatA, LngA, LatB, LngB)
+			speech = "我没有更多的啦，只能从头再开始一遍咯！\n我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(distance) + "km。\n 你喜欢嘛？"
 	
 	if action == 'query.restaurants.moreInformation':
 		context = findContext(result["contexts"], "restaurants_recommended")
