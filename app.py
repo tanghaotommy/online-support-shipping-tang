@@ -206,6 +206,7 @@ def makeResponse2(req):
 	if action == 'delete.unknownLocation':
 		speech = "好吧，那是哪里呀？"
 		res["contextOut"] = deleteContext(result["contexts"], "user_asks4_restaurants_withunknownlocation")
+		res["contextOut"] = extendContext(result["contexts"], "user_asks4_restaurants_withtaste", 3)
 
 	if action == 'query.restaurants.taste':
 		speech = answers_query_restaurants_taste[0] % (parameters.get('taste'),)
