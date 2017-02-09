@@ -214,7 +214,7 @@ def makeResponse2(req):
 		res["contextOut"] = deleteContext(result["contexts"], "user_asks4_restaurants_withunknownlocation")
 		context = findContext(result["contexts"], "user_asks4_restaurants_withtaste")
 		if context and context['lifespan'] <= 1:
-			speech = "哎呀，你不是好多次啦，我有点笨，所以被搞糊涂了。给我次机会，我们重头再来一次吧！如果地址老是不对你就给我发位置啦！"
+			speech = "哎呀，地址搞错好多次啦～我有点笨记不住那么多，所以被搞糊涂了。\n给我次机会，我们重头再来一次吧！如果地址老是不对你就给我发位置啦！"
 			res["contextOut"] = clearContexts(result.get("contexts"))
 
 	if action == 'query.restaurants.taste':
