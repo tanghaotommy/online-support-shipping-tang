@@ -286,6 +286,7 @@ def makeResponse2(req):
 		schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
 'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
 		if current < context["parameters"]["max"] - 1:
+			mysql = Mysql()
 			mysql.connect(mysql_config)
 			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (current), schema)[0]
 			mysql.close()
@@ -294,6 +295,7 @@ def makeResponse2(req):
 		else:
 			current = 0
 			context["parameters"]["current"] = 0
+			mysql = Mysql()
 			mysql.connect(mysql_config)
 			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (current), schema)[0]
 			mysql.close()
@@ -302,6 +304,7 @@ def makeResponse2(req):
 	if action == 'query.restaurants.moreInformation':
 		context = findContext(result["contexts"], "restaurants_recommended")
 		current = context["parameters"]["current"]
+		mysql = Mysql()
 		mysql.connect(mysql_config)
 		item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (current), schema)[0]
 		mysql.close()
