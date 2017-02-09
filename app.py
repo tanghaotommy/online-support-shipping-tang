@@ -188,7 +188,7 @@ def makeResponse2(req):
           "taste.original": "",
           "taste": parameters["taste"]
         },
-        "lifespan": 3}]
+        "lifespan": 5}]
 			if not (res["contextOut"] == ""):
 				res["contextOut"].extend(contextOut)
 			else:
