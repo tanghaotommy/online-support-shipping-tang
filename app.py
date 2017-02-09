@@ -165,6 +165,13 @@ def extendContext(contexts, name, lifespan):
 			break
 	return contexts
 
+def extendContext(contexts, name, lifespan):
+	for context in contexts:
+		if context["name"] == name:
+			context["lifespan"] = lifespan
+			return context
+	return None
+
 def makeResponse2(req):
 	action = req.get("result").get("action")
 	result = req.get("result")
@@ -206,7 +213,10 @@ def makeResponse2(req):
 	if action == 'delete.unknownLocation':
 		speech = "好吧，那是哪里呀？"
 		res["contextOut"] = deleteContext(result["contexts"], "user_asks4_restaurants_withunknownlocation")
-		res["contextOut"] = extendContext(result["contexts"], "user_asks4_restaurants_withtaste", 3)
+		context = findContext(result["contexts"], "user_asks4_restaurants_withtaste")
+		if context and context['lifespan'] <= 1:
+			speech = "哎呀，你弄错好多次啦，我都被搞糊涂了。我们重来吧！"
+			res["contextOut"] = clearContexts(result.get("contexts"))
 
 	if action == 'query.restaurants.taste':
 		speech = answers_query_restaurants_taste[0] % (parameters.get('taste'),)
