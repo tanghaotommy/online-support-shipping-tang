@@ -279,7 +279,6 @@ def makeResponse2(req):
 			speech = '哎呀！数据库出了点小问题！等我下！'
 
 	if action == 'query.restaurants.next':
-		extendContext(result["contexts"], "restaurants_recommended", 3)
 		context = findContext(result["contexts"], "restaurants_recommended")
 		lists = context["parameters"]["lists"]
 		current = context["parameters"]["current"] + 1
@@ -300,10 +299,18 @@ def makeResponse2(req):
 
 			_distance = distance(LatA, LngA, LatB, LngB)
 			speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(_distance) + "km。\n 你喜欢嘛？"
+			
 			context["parameters"]["current"] = current
+			contextOut = [{"name": "restaurants_recommended", "parameters": context["parameters"], "lifespan": 3}]
+			res["contextOut"] = clearContexts(result.get("contexts"))
+			res["contextOut"].extend(contextOut)
 		else:
 			current = 0
-			context["parameters"]["current"] = 0
+			context["parameters"]["current"] = current
+			contextOut = [{"name": "restaurants_recommended", "parameters": context["parameters"], "lifespan": 3}]
+			res["contextOut"] = clearContexts(result.get("contexts"))
+			res["contextOut"].extend(contextOut)
+			
 			mysql = Mysql()
 			mysql.connect(mysql_config)
 			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), schema)[0]
