@@ -218,7 +218,7 @@ def makeResponse2(req):
 			res["contextOut"] = clearContexts(result.get("contexts"))
 
 	if action == 'query.restaurants.taste':
-		speech = answers_query_restaurants_taste[0] % (parameters.get('taste'),)
+		speech = answers_query_restaurants_taste[0] % (parameters.get('taste'))
 
 	if action == 'query.restaurants.unknownLocation':
 		address = result.get('resolvedQuery')
@@ -343,6 +343,14 @@ def makeResponse2(req):
 
 		speech = "他们家的招牌菜是" + item["signature"] + "。\n" + "人均大概在$" + item["price_average"] + "左右。"
 		#speech = result.get('resolvedQuery')
+
+	if action == 'query.restaurants.withoutTaste':
+		speech = '好的，没问题，交给我来！\n那你能告诉我你的位置么？这样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。'
+
+		res["contextOut"] = [{"name": "user_asks4_restaurants_withtaste", "parameters": {
+		"taste.original": "",
+		"taste": "all"},
+		"lifespan": 5}]
 
 	print("Response:" + str(speech))
 	res["speech"] = speech
