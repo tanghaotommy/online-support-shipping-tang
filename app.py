@@ -175,6 +175,15 @@ def makeResponse2(req):
 				res["contextOut"] = {"contextOut": contextOut}
 		else: 
 			speech = answers_query_restaurants[random.randint(0, len(answers_query_restaurants))]
+			contextOut = [{"name": "user_asks4_restaurants", "parameters": {
+			"taste.original": "",
+			"taste": ""
+			},
+			"lifespan": 3}]
+			if not (res["contextOut"] == ""):
+				res["contextOut"].extend(contextOut)
+			else:
+				res["contextOut"] = {"contextOut": contextOut}
 		print '123'
 
 	if action == 'query.restaurants.location':
