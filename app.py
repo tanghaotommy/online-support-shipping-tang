@@ -132,10 +132,19 @@ def restaurantsRec():
     return r
 
 def distance(LatA, LngA, LatB, LngB):
-	C = math.sin(LatA)*math.sin(LatB)*math.cos(LngA-LngB) + math.cos(LatA)*math.cos(LatB)
+	#http://www.movable-type.co.uk/scripts/latlong.html
+	phi1 = math.radians(LatA)
+	phi2 = math.radians(LatB)
+	deltaPhi = math.radians(LatB - LatA)
+	deltaLambda = math.radians(LngB - LngA)
+
+	a = math.sin(deltaPhi/2)*math.sin(deltaPhi/2) + math.cos(phi1)*math.cos(phi2)*math.sin(deltaLambda/2)*math.sin(deltaLambda/2)
+	c = 2*math.atan2(math.sqrt(a), math.sqrt(1-a))
+	# C = math.sin(LatA)*math.sin(LatB)*math.cos(LngA-LngB) + math.cos(LatA)*math.cos(LatB)
 	R = 6371.004
-	distance = round(R*math.acos(C)*math.pi/180, 1)
-	return distance
+	# distance = round(R*math.acos(C)*math.pi/180, 1)
+	distance = R * c
+	return round(distance, 1)
 
 def makeResponse2(req):
 	action = req.get("result").get("action")
@@ -183,8 +192,8 @@ def makeResponse2(req):
 					LngA = context['parameters']['location']['location']['lng']
 					break
 
-			# print 'LatA' + str(LatA)
-			# print 'LngA' + str(LngA)
+			print 'LatA' + str(LatA)
+			print 'LngA' + str(LngA)
 			distance_map = {}
 			for row in results:
 				LatB = row['latitude']
@@ -196,11 +205,11 @@ def makeResponse2(req):
 
 			mysql.connect(mysql_config)
 			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (sorted_key_list[0]), schema)[0]
-			# print sorted_key_list[0]
-			# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
-			# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
-			# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
-			speech = "我们给您推荐" + item['name_cn'] + "。它在" + item['address'] + '\n' + "您距离它有" + str(distance_map[sorted_key_list[0]]) + "km"
+			print sorted_key_list[0]
+			print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
+			print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
+			print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
+			speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(distance_map[sorted_key_list[0]]) + "km。\n 你喜欢嘛？"
 		else:
 			speech = '哎呀！数据库出了点小问题！等我下！'
 		
