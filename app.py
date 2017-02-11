@@ -235,11 +235,15 @@ def makeResponse2(req):
 			speech = answers_query_restaurants_unknownLocation[1]
 
 	if action == 'query.restaurants.show':
+		taste = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["taste"]
 		mysql = Mysql()
 		if(mysql.connect(mysql_config) == None):
 			schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
 'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
-			results = mysql.query("SELECT * FROM Restaurants", schema)
+			if taste == "all":
+				results = mysql.query("SELECT * FROM Restaurants", schema)
+			else:
+				results = mysql.query("SELECT * FROM Restaurants WHERE type LIKE %s" % (taste), schema)
 			mysql.close()
 			for context in result.get('contexts'):
 				if context['name'] == 'user_asks4_restaurants_withunknownlocation':
