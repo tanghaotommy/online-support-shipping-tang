@@ -243,7 +243,7 @@ def makeResponse2(req):
 			if taste == "all":
 				results = mysql.query("SELECT * FROM Restaurants", schema)
 			else:
-				results = mysql.query("SELECT * FROM Restaurants WHERE type LIKE '\%%s\%'" % (taste), schema)
+				results = mysql.query("SELECT * FROM Restaurants WHERE type LIKE '%%%s%%'" % (taste), schema)
 			mysql.close()
 			for context in result.get('contexts'):
 				if context['name'] == 'user_asks4_restaurants_withunknownlocation':
