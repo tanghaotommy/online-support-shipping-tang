@@ -122,9 +122,8 @@ def check_location():
     req = request.get_json(silent=True, force=True)
     print("RequestFromWeChat User Location:")
     print(json.dumps(req, indent=4))
-    address = str(req['latitude']) + "+" + str(req['longitude'])
 
-    res = googleGeocode(address)
+    res = googleGeocode(req)
 
     res = json.dumps(res, indent=4)
     print(res)
@@ -162,7 +161,10 @@ def distance(LatA, LngA, LatB, LngB):
 	distance = R * c
 	return round(distance, 1)
 
-def googleGeocode(address):
+def googleGeocode(req):
+	latitude = req['latitude']
+	longitude = req['longitude']
+	address = str(latitude) + " " + str(longitude)
 	address = re.sub(" ", '+', address)
 	print address
 	url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=%s"
