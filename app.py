@@ -23,7 +23,7 @@ GOOGLEMAPS_API_KEY = "AIzaSyABcAARrYGpUs-9PCD1B7tdl3tMaxGHBZU"
 mysql_config = config = {
   'user': 'root',
   'password': 'password',
-  'host': 'database.cii5tvbuf3ji.us-west-1.rds.amazonaws.com',
+  'host': 'newdatabase.cii5tvbuf3ji.us-west-1.rds.amazonaws.com',
   'database': 'RestaurantsRecommendation'
 }
 
