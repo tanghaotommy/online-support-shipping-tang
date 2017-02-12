@@ -116,6 +116,23 @@ def smarthome():
     r.headers['Content-Type'] = 'application/json'
     return r
 
+@app.route('/check_location', methods=['POST'])
+def smarthome():
+    req = request.get_json(silent=True, force=True)
+
+    print("RequestFromWeChat User Location:")
+    print(json.dumps(req, indent=4))
+
+    var address = str(req[results][latitude]) + "+" + str(req[results][longitude])
+
+    res = googleGeocode(address)
+
+    res = json.dumps(res, indent=4)
+    print(res)
+    r = make_response(res)
+    r.headers['Content-Type'] = 'application/json'
+    return r
+
 @app.route('/restaurantsRec', methods=['POST'])
 def restaurantsRec():
     req = request.get_json(silent=True, force=True)
@@ -145,6 +162,23 @@ def distance(LatA, LngA, LatB, LngB):
 	# distance = round(R*math.acos(C)*math.pi/180, 1)
 	distance = R * c
 	return round(distance, 1)
+
+def googleGeocode(address):
+	address = re.sub(" ", '+', address)
+	url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=%s"
+	url = url % (address, GOOGLEMAPS_API_KEY)
+	r = requests.get(url)
+	res = r.json()
+	if res['status'] == 'OK':
+		formatted_address = res['results'][0]['formatted_address']
+		speech = answers_query_restaurants_unknownLocation[0] % (formatted_address)
+		res["contextOut"] = [{"name": "user_asks4_restaurants_withunknownlocation","parameters": {"location.original": address, "location": {'formatted_address': formatted_address,'location': res['results'][0]['geometry']['location']},},"lifespan": 3}]
+	else:
+		speech = answers_query_restaurants_unknownLocation[1]
+	res["speech"] = speech
+	res["displayText"] = speech
+	res["source"] = "shokse-restaurants-recommendation"
+	return res
 
 def clearContexts(contexts):
 	for context in contexts:
