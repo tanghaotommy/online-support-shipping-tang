@@ -117,13 +117,13 @@ def smarthome():
     return r
 
 @app.route('/check_location', methods=['POST'])
-def smarthome():
+def check_location():
+   
     req = request.get_json(silent=True, force=True)
-
     print("RequestFromWeChat User Location:")
     print(json.dumps(req, indent=4))
-
-    var address = str(req[results][latitude]) + "+" + str(req[results][longitude])
+    print(req)
+    address = str(req[latitude]) + "+" + str(req[longitude])
 
     res = googleGeocode(address)
 
