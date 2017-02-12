@@ -23,7 +23,7 @@ GOOGLEMAPS_API_KEY = "AIzaSyABcAARrYGpUs-9PCD1B7tdl3tMaxGHBZU"
 mysql_config = config = {
   'user': 'root',
   'password': 'password',
-  'host': 'mysql.cii5tvbuf3ji.us-west-1.rds.amazonaws.com',
+  'host': 'database.cii5tvbuf3ji.us-west-1.rds.amazonaws.com',
   'database': 'RestaurantsRecommendation'
 }
 
@@ -122,8 +122,7 @@ def check_location():
     req = request.get_json(silent=True, force=True)
     print("RequestFromWeChat User Location:")
     print(json.dumps(req, indent=4))
-    print(req)
-    address = str(req[latitude]) + "+" + str(req[longitude])
+    address = str(req['latitude']) + "+" + str(req['longitude'])
 
     res = googleGeocode(address)
 
@@ -165,14 +164,17 @@ def distance(LatA, LngA, LatB, LngB):
 
 def googleGeocode(address):
 	address = re.sub(" ", '+', address)
+	print address
 	url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=%s"
 	url = url % (address, GOOGLEMAPS_API_KEY)
 	r = requests.get(url)
-	res = r.json()
-	if res['status'] == 'OK':
-		formatted_address = res['results'][0]['formatted_address']
+	response = r.json()
+	print response
+	res = {}
+	if response['status'] == 'OK':
+		formatted_address = response['results'][0]['formatted_address']
 		speech = answers_query_restaurants_unknownLocation[0] % (formatted_address)
-		res["contextOut"] = [{"name": "user_asks4_restaurants_withunknownlocation","parameters": {"location.original": address, "location": {'formatted_address': formatted_address,'location': res['results'][0]['geometry']['location']},},"lifespan": 3}]
+		res["contextOut"] = [{"name": "user_asks4_restaurants_withunknownlocation","parameters": {"location.original": address, "location": {'formatted_address': formatted_address,'location': response['results'][0]['geometry']['location']},},"lifespan": 3}]
 	else:
 		speech = answers_query_restaurants_unknownLocation[1]
 	res["speech"] = speech
@@ -260,11 +262,11 @@ def makeResponse2(req):
 		url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=%s"
 		url = url % (address, GOOGLEMAPS_API_KEY)
 		r = requests.get(url)
-		res = r.json()
-		if res['status'] == 'OK':
-			formatted_address = res['results'][0]['formatted_address']
+		response = r.json()
+		if response['status'] == 'OK':
+			formatted_address = response['results'][0]['formatted_address']
 			speech = answers_query_restaurants_unknownLocation[0] % (formatted_address)
-			res["contextOut"] = [{"name": "user_asks4_restaurants_withunknownlocation","parameters": {"location.original": result.get('resolvedQuery'), "location": {'formatted_address': formatted_address,'location': res['results'][0]['geometry']['location']},},"lifespan": 3}]
+			res["contextOut"] = [{"name": "user_asks4_restaurants_withunknownlocation","parameters": {"location.original": result.get('resolvedQuery'), "location": {'formatted_address': formatted_address,'location': response['results'][0]['geometry']['location']},},"lifespan": 3}]
 		else:
 			speech = answers_query_restaurants_unknownLocation[1]
 
