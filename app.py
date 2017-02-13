@@ -291,32 +291,36 @@ def makeResponse2(req):
 
 			# print 'LatA' + str(LatA)
 			# print 'LngA' + str(LngA)
-			distance_map = {}
-			for row in results:
-				LatB = row['latitude']
-				LngB = row['longitude']
-				distance_map[row['id']] = distance(LatA, LngA, LatB, LngB)
+			if len(results) > 0:
+				distance_map = {}
+				for row in results:
+					LatB = row['latitude']
+					LngB = row['longitude']
+					distance_map[row['id']] = distance(LatA, LngA, LatB, LngB)
 
 
-			sorted_key_list = sorted(distance_map, key=distance_map.get)
+				sorted_key_list = sorted(distance_map, key=distance_map.get)
 
-			mysql.connect(mysql_config)
-			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (sorted_key_list[0]), schema)[0]
-			mysql.close()
+				mysql.connect(mysql_config)
+				item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (sorted_key_list[0]), schema)[0]
+				mysql.close()
 
-			contextOut = [{"name": "restaurants_recommended", "parameters": {
-			"lists": sorted_key_list,
-			"max": len(sorted_key_list), 
-			"current": 0,
-			"user_location": findContext(result["contexts"], 'user_asks4_restaurants_withunknownlocation')["parameters"]},
-			"lifespan": 3}]
-			res["contextOut"] = clearContexts(result.get("contexts"))
-			res["contextOut"].extend(contextOut)
-			# print sorted_key_list[0]
-			# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
-			# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
-			# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
-			speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(distance_map[sorted_key_list[0]]) + "km。\n 你喜欢嘛？"
+				contextOut = [{"name": "restaurants_recommended", "parameters": {
+				"lists": sorted_key_list,
+				"max": len(sorted_key_list), 
+				"current": 0,
+				"user_location": findContext(result["contexts"], 'user_asks4_restaurants_withunknownlocation')["parameters"]},
+				"lifespan": 3}]
+				res["contextOut"] = clearContexts(result.get("contexts"))
+				res["contextOut"].extend(contextOut)
+				# print sorted_key_list[0]
+				# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
+				# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
+				# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
+				speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(distance_map[sorted_key_list[0]]) + "km。\n 你喜欢嘛？"
+			else:
+				res["contextOut"] = clearContexts(result.get("contexts"))
+				speech = "哎呀，对不起，我找不到符合条件的餐馆。"
 		else:
 			speech = '哎呀！数据库出了点小问题！等我下！'
 
