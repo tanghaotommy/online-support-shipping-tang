@@ -26,6 +26,10 @@ mysql_config = config = {
   'host': 'newdatabase.cii5tvbuf3ji.us-west-1.rds.amazonaws.com',
   'database': 'RestaurantsRecommendation'
 }
+flavor_taste = {
+	'辣的': '川菜',
+	'甜的': '上海菜'
+}
 
 answers_query_restaurants = ['你喜欢哪种口味的菜？（比如川菜，粤菜，火锅，上海菜，粥等等）', '你喜欢哪种风格的菜？（比如川菜，粤菜，火锅，上海菜，粥等等）']
 answers_query_restaurants_location = ['好的，请稍等！正在搜寻中！']
@@ -220,11 +224,15 @@ def makeResponse2(req):
 
 	if action == 'query.restaurants':
 		if result.has_key("contexts"): res["contextOut"] = clearContexts(result.get("contexts"))
-		if not (parameters["taste"] == ""):
+		if not ((parameters["taste"] == "" && parameters["dish"] == "" && parameters["flavor"] == "")):
 			speech = answers_query_restaurants_taste[0] % (parameters.get('taste'))
 			contextOut = [{"name": "user_asks4_restaurants_withtaste", "parameters": {
           "taste.original": "",
           "taste": parameters["taste"]
+          "dish": parameters["dish"]
+          "dish.original": ""
+          "flavor": parameters["flavor"]
+          "flavor.original": ""
         },
         "lifespan": 5}]
 			if not (res["contextOut"] == ""):
@@ -236,6 +244,10 @@ def makeResponse2(req):
 			contextOut = [{"name": "user_asks4_restaurantsrec", "parameters": {
 			"taste.original": "",
 			"taste": ""
+			"dish": ""
+			"dish.original": ""
+			"flavor": ""
+			"flavor.original": ""
 			},
 			"lifespan": 3}]
 			if not (res["contextOut"] == ""):
@@ -256,7 +268,7 @@ def makeResponse2(req):
 			res["contextOut"] = clearContexts(result.get("contexts"))
 
 	if action == 'query.restaurants.taste':
-		speech = answers_query_restaurants_taste[0] % (parameters.get('taste'))
+		speech = answers_query_restaurants_taste[0] % (parameters.get('taste') + parameters.get('dish') + parameters.get('flavor'))
 
 	if action == 'query.restaurants.unknownLocation':
 		address = result.get('resolvedQuery')
@@ -274,6 +286,10 @@ def makeResponse2(req):
 
 	if action == 'query.restaurants.show':
 		taste = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["taste"]
+		dish = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["dish"]
+		flavor = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["flavor"]
+		if flavor_taste.has_key(flavor):
+			taste = flavor_taste[flavor]
 		mysql = Mysql()
 		if(mysql.connect(mysql_config) == None):
 			schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
@@ -281,7 +297,7 @@ def makeResponse2(req):
 			if taste == "all":
 				results = mysql.query("SELECT * FROM Restaurants", schema)
 			else:
-				results = mysql.query("SELECT * FROM Restaurants WHERE type LIKE '%%%s%%'" % (taste), schema)
+				results = mysql.query("SELECT * FROM Restaurants WHERE type LIKE '%%%s%%' OR signature LIKE '%%%s%%'" % (taste), schema)
 			mysql.close()
 			for context in result.get('contexts'):
 				if context['name'] == 'user_asks4_restaurants_withunknownlocation':
