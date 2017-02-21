@@ -289,7 +289,9 @@ def makeResponse2(req):
 		if taste == '': taste = '-1'
 		dish = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["dish"]
 		if dish == '': dish = '-1'
-		flavor = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["flavor"]
+		flavor = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["flavor"].encode('utf-8')
+		print flavor
+		print flavor_taste
 		if flavor_taste.has_key(flavor):
 			taste = flavor_taste[flavor]
 		mysql = Mysql()
