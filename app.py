@@ -222,6 +222,21 @@ def makeResponse2(req):
 	print action
 	speech = '出错啦！！！'
 
+	if action == 'query.restaurant':
+		restaurant = parameters['restaurant_chinese']
+		if not restaurant == "":
+			mysql = Mysql()
+			mysql.connect(mysql_config)
+			schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
+'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
+			results = mysql.query("SELECT * FROM Restaurants WHERE name_cn = %s" % (restaurant), schema)
+			if len(results) >= 1:
+				speech = "你说的一定是" + results[0]['name_cn'] + "。它在" + results[0]['address'] + "。他们家的招牌菜是" + results[0]['signature'] + "。"
+			else:
+				speech = "哎呀，我不知道这是哪家店哎！过几天再来问问看呢。"
+		else:
+			speech = "你在说什么呀？"
+			
 	if action == 'query.restaurants':
 		if result.has_key("contexts"): res["contextOut"] = clearContexts(result.get("contexts"))
 		if not ((parameters["taste"] == "" and parameters["dish"] == "" and parameters["flavor"] == "")):
