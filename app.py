@@ -232,7 +232,7 @@ def makeResponse2(req):
 'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
 			results = mysql.query("SELECT * FROM Restaurants WHERE name_en = '%s'" % (restaurant), schema)
 			if len(results) >= 1:
-				speech = "你说的一定是" + results[0]['name_cn'] + "。它在" + results[0]['address'] + "。他们家的招牌菜是" + results[0]['signature'] + "。"
+				speech = "你说的一定是" + results[0]['name_cn'] + "。它在" + results[0]['address'] + "。他们家的招牌菜是" + results[0]['signature'] + "。我说的对不对呀！"
 			else:
 				speech = "哎呀，我不知道这是哪家店哎！过几天再来问问看呢。"
 		else:
