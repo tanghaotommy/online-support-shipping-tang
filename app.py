@@ -229,7 +229,7 @@ def makeResponse2(req):
 			mysql.connect(mysql_config)
 			schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
 'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
-			results = mysql.query("SELECT * FROM Restaurants WHERE name_cn = %s" % (restaurant), schema)
+			results = mysql.query("SELECT * FROM Restaurants WHERE name_en = %s" % (restaurant), schema)
 			if len(results) >= 1:
 				speech = "你说的一定是" + results[0]['name_cn'] + "。它在" + results[0]['address'] + "。他们家的招牌菜是" + results[0]['signature'] + "。"
 			else:
