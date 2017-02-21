@@ -286,7 +286,9 @@ def makeResponse2(req):
 
 	if action == 'query.restaurants.show':
 		taste = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["taste"]
+		if taste == '': taste = '-1'
 		dish = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["dish"]
+		if dish == '': dish = '-1'
 		flavor = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["flavor"]
 		if flavor_taste.has_key(flavor):
 			taste = flavor_taste[flavor]
