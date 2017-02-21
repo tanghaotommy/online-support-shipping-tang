@@ -225,7 +225,7 @@ def makeResponse2(req):
 	if action == 'query.restaurants':
 		if result.has_key("contexts"): res["contextOut"] = clearContexts(result.get("contexts"))
 		if not ((parameters["taste"] == "" and parameters["dish"] == "" and parameters["flavor"] == "")):
-			speech = answers_query_restaurants_taste[0] % (parameters.get('taste'))
+			speech = answers_query_restaurants_taste[0] % (parameters.get('taste') + parameters.get('flavor') + parameters.get('dish'))
 			contextOut = [{"name": "user_asks4_restaurants_withtaste", "parameters": {
           "taste.original": "",
           "taste": parameters["taste"],
