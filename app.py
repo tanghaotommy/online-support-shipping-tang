@@ -224,14 +224,14 @@ def makeResponse2(req):
 
 	if action == 'query.restaurants':
 		if result.has_key("contexts"): res["contextOut"] = clearContexts(result.get("contexts"))
-		if not ((parameters["taste"] == "" && parameters["dish"] == "" && parameters["flavor"] == "")):
+		if not ((parameters["taste"] == "" and parameters["dish"] == "" and parameters["flavor"] == "")):
 			speech = answers_query_restaurants_taste[0] % (parameters.get('taste'))
 			contextOut = [{"name": "user_asks4_restaurants_withtaste", "parameters": {
           "taste.original": "",
-          "taste": parameters["taste"]
-          "dish": parameters["dish"]
-          "dish.original": ""
-          "flavor": parameters["flavor"]
+          "taste": parameters["taste"],
+          "dish": parameters["dish"],
+          "dish.original": "",
+          "flavor": parameters["flavor"],
           "flavor.original": ""
         },
         "lifespan": 5}]
@@ -243,10 +243,10 @@ def makeResponse2(req):
 			speech = answers_query_restaurants[random.randint(0, len(answers_query_restaurants) - 1)]
 			contextOut = [{"name": "user_asks4_restaurantsrec", "parameters": {
 			"taste.original": "",
-			"taste": ""
-			"dish": ""
-			"dish.original": ""
-			"flavor": ""
+			"taste": "",
+			"dish": "",
+			"dish.original": "",
+			"flavor": "",
 			"flavor.original": ""
 			},
 			"lifespan": 3}]
@@ -297,7 +297,7 @@ def makeResponse2(req):
 			if taste == "all":
 				results = mysql.query("SELECT * FROM Restaurants", schema)
 			else:
-				results = mysql.query("SELECT * FROM Restaurants WHERE type LIKE '%%%s%%' OR signature LIKE '%%%s%%'" % (taste), schema)
+				results = mysql.query("SELECT * FROM Restaurants WHERE type LIKE '%%%s%%' OR signature LIKE '%%%s%%'" % (taste, dish), schema)
 			mysql.close()
 			for context in result.get('contexts'):
 				if context['name'] == 'user_asks4_restaurants_withunknownlocation':
