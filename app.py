@@ -91,7 +91,7 @@ app = Flask(__name__)
 print ('嘿嘿')
 
 @app.route('/user_location', methods=['POST'])
-def webhook():
+def user_location():
 	req = request.get_json(silent=True, force=True)
 
 	print("Request to user_location:")
