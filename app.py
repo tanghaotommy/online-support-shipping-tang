@@ -90,6 +90,21 @@ class Mysql(object):
 app = Flask(__name__)
 print ('嘿嘿')
 
+@app.route('/user_location', methods=['POST'])
+def webhook():
+	req = request.get_json(silent=True, force=True)
+
+	print("Request to user_location:")
+	print(json.dumps(req, indent=4))
+
+	res = "Success"
+
+	res = json.dumps(res, indent=4)
+	print(res)
+	r = make_response(res)
+	r.headers['Content-Type'] = 'application/json'
+	return r
+
 @app.route('/webhook', methods=['POST'])
 def webhook():
     req = request.get_json(silent=True, force=True)
