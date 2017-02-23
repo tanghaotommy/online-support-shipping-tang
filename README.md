@@ -1,4 +1,4 @@
-#How to Provide Replies about Shipping Costs via Api.ai Webhook
+#Webhook for Chatbot Server of SmartHome Project
 
 This is the Api.ai webhook for SmartHome project.
 
