@@ -346,8 +346,10 @@ def makeResponse2(req):
 			db = client.wechat
 			document = db.UserLocation.find({"user_id": user_id})[0]
 			print document
-			LatA = float(document['location']['latitude'])
-			LngA = float(document['location']['longitude'])
+			location = document['location']
+			print location
+			LatA = float(location['latitude'])
+			LngA = float(location['longitude'])
 			print LatA
 			print LngA
 			client.close()
@@ -371,7 +373,7 @@ def makeResponse2(req):
 				"lists": sorted_key_list,
 				"max": len(sorted_key_list), 
 				"current": 0,
-				"user_location": findContext(result["contexts"], 'user_asks4_restaurants_withunknownlocation')["parameters"]},
+				"user_location": {"location": location}},
 				"lifespan": 3}]
 				res["contextOut"] = clearContexts(result.get("contexts"))
 				res["contextOut"].extend(contextOut)
