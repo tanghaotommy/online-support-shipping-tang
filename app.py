@@ -345,8 +345,11 @@ def makeResponse2(req):
 			client = MongoClient()
 			db = client.wechat
 			document = db.UserLocation.find({"user_id": user_id})[0]
+			print document
 			LatA = document['location']['latitude']
 			LngA = document['location']['longitude']
+			print LatA
+			print LngA
 			client.close()
 			# print 'LatA' + str(LatA)
 			# print 'LngA' + str(LngA)
