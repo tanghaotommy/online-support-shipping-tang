@@ -386,7 +386,7 @@ def makeResponse2(req):
 	if action == 'query.restaurants.taste':
 		client = MongoClient()
 		db = client.wechat
-		if db.UserLocation.find({"user_id": req['user_id']}).count() >= 1:
+		if db.UserLocation.find({"user_id": user_id}).count() >= 1:
 			speech = answers_query_restaurants_taste[1] % (parameters.get('taste') + parameters.get('dish') + parameters.get('flavor'))
 		else:
 			speech = answers_query_restaurants_taste[0] % (parameters.get('taste') + parameters.get('dish') + parameters.get('flavor'))
