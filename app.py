@@ -112,8 +112,7 @@ def user_location():
 	else:
 		db.UserLocation.insert_one({"user_id": req['user_id'], "timestamp": time.time(), "location": {"latitude": req['latitude'], "longitude": req['longitude']}})
 		print "Insert user location!"
-
-	db.close()
+	client.close()
 	# user_location = db.UserLocation.find({"user_id": req['user_id']},{"_id": False})[0]
 	# print user_location
 
@@ -280,7 +279,7 @@ def makeResponse2(req):
 				speech = answers_query_restaurants_taste[1] % (parameters.get('taste') + parameters.get('flavor') + parameters.get('dish'))
 			else:
 				speech = answers_query_restaurants_taste[0] % (parameters.get('taste') + parameters.get('flavor') + parameters.get('dish'))
-			db.close()
+			client.close()
 			contextOut = [{"name": "user_asks4_restaurants_withtaste", "parameters": {
           "taste.original": "",
           "taste": parameters["taste"],
@@ -348,7 +347,7 @@ def makeResponse2(req):
 			document = db.UserLocation.find({"user_id": user_id})[0]
 			LatA = document['location']['latitude']
 			LngA = document['location']['longitude']
-			db.close()
+			client.close()
 			# print 'LatA' + str(LatA)
 			# print 'LngA' + str(LngA)
 			if len(results) > 0:
@@ -391,7 +390,7 @@ def makeResponse2(req):
 			speech = answers_query_restaurants_taste[1] % (parameters.get('taste') + parameters.get('dish') + parameters.get('flavor'))
 		else:
 			speech = answers_query_restaurants_taste[0] % (parameters.get('taste') + parameters.get('dish') + parameters.get('flavor'))
-		db.close()
+		client.close()
 
 	if action == 'query.restaurants.unknownLocation':
 		address = result.get('resolvedQuery')
