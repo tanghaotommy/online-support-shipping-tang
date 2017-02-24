@@ -346,8 +346,8 @@ def makeResponse2(req):
 			db = client.wechat
 			document = db.UserLocation.find({"user_id": user_id})[0]
 			print document
-			LatA = document['location']['latitude']
-			LngA = document['location']['longitude']
+			LatA = float(document['location']['latitude'])
+			LngA = float(document['location']['longitude'])
 			print LatA
 			print LngA
 			client.close()
