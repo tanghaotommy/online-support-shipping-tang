@@ -5,7 +5,9 @@ import json
 import os
 import requests
 import re
+import time
 import sys
+from pymongo import MongoClient
 import math
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
@@ -34,7 +36,8 @@ flavor_taste = {
 answers_query_restaurants = ['你喜欢哪种口味的菜？（比如川菜，粤菜，火锅，上海菜，粥等等）', '你喜欢哪种风格的菜？（比如川菜，粤菜，火锅，上海菜，粥等等）']
 answers_query_restaurants_location = ['好的，请稍等！正在搜寻中！']
 answers_query_restaurants_taste = ['好的，%s是个很棒的选择哦。那你能告诉我你的位置么？这\
-样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。']
+样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。（可以在公众号设置内允许我访问你的当前位置，这样以后就不用你输入地址啦！）', '好的，%s是个很棒的选择哦。\n那我使用你当前的位置进行查找可以嘛？\
+或者你直接打你所在的地址，也可以发送你当前位置。']
 answers_query_restaurants_unknownLocation = ['请问是%s嘛？', '对不起，我不知道这个是哪里。你能再说一遍么？']
 
 class Mysql(object):
@@ -98,6 +101,21 @@ def user_location():
 	print(json.dumps(req, indent=4))
 
 	res = "Success"
+
+	client = MongoClient()
+	db = client.wechat
+
+	if db.UserLocation.find({"user_id": req['user_id']}).count() >= 1:
+		#db.UserLocation.update({"user_id": req['user_id']}, {"user_id": req['user_id'], "timestamp": time.time(), "location": {"latitude": req['latitude'], "longitude": req['longitude']}})
+		db.UserLocation.update({"user_id": req['user_id']}, {"$set": {"timestamp": time.time(), "location": {"latitude": req['latitude'], "longitude": req['longitude']}}})
+		print "Update user location!"
+	else:
+		db.UserLocation.insert_one({"user_id": req['user_id'], "timestamp": time.time(), "location": {"latitude": req['latitude'], "longitude": req['longitude']}})
+		print "Insert user location!"
+
+	db.close()
+	# user_location = db.UserLocation.find({"user_id": req['user_id']},{"_id": False})[0]
+	# print user_location
 
 	res = json.dumps(res, indent=4)
 	print(res)
@@ -231,7 +249,7 @@ def findContext(contexts, name):
 def makeResponse2(req):
 	action = req.get("result").get("action")
 	result = req.get("result")
-	facebook_userId = str(req.get("sessionId"))
+	user_id = req.get("sessionId")
 	parameters = result.get("parameters")
 	res = {}
 	print action
@@ -256,7 +274,13 @@ def makeResponse2(req):
 	if action == 'query.restaurants':
 		if result.has_key("contexts"): res["contextOut"] = clearContexts(result.get("contexts"))
 		if not ((parameters["taste"] == "" and parameters["dish"] == "" and parameters["flavor"] == "")):
-			speech = answers_query_restaurants_taste[0] % (parameters.get('taste') + parameters.get('flavor') + parameters.get('dish'))
+			client = MongoClient()
+			db = client.wechat
+			if db.UserLocation.find({"user_id": user_id}).count() >= 1:
+				speech = answers_query_restaurants_taste[1] % (parameters.get('taste') + parameters.get('flavor') + parameters.get('dish'))
+			else:
+				speech = answers_query_restaurants_taste[0] % (parameters.get('taste') + parameters.get('flavor') + parameters.get('dish'))
+			db.close()
 			contextOut = [{"name": "user_asks4_restaurants_withtaste", "parameters": {
           "taste.original": "",
           "taste": parameters["taste"],
@@ -298,8 +322,76 @@ def makeResponse2(req):
 			speech = "哎呀，地址搞错好多次啦～我有点笨记不住那么多，所以被搞糊涂了。\n给我次机会，我们重头再来一次吧！如果地址老是不对你就给我发位置啦！"
 			res["contextOut"] = clearContexts(result.get("contexts"))
 
+	if action == 'query.restaurants.location':
+		#same as query.restaurants.show
+		taste = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["taste"]
+		if taste == '': taste = '-1'
+		dish = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["dish"]
+		if dish == '': dish = '-1'
+		flavor = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["flavor"].encode('utf-8')
+		print flavor
+		print flavor_taste
+		if flavor_taste.has_key(flavor):
+			taste = flavor_taste[flavor]
+		mysql = Mysql()
+		if(mysql.connect(mysql_config) == None):
+			schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
+'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
+			if taste == "all":
+				results = mysql.query("SELECT * FROM Restaurants", schema)
+			else:
+				results = mysql.query("SELECT * FROM Restaurants WHERE type LIKE '%%%s%%' OR signature LIKE '%%%s%%'" % (taste, dish), schema)
+			mysql.close()
+
+			client = MongoClient()
+			db = client.wechat
+			document = db.UserLocation.find({"user_id": user_id})[0]
+			LatA = document['location']['latitude']
+			LngA = document['location']['longitude']
+			db.close()
+			# print 'LatA' + str(LatA)
+			# print 'LngA' + str(LngA)
+			if len(results) > 0:
+				distance_map = {}
+				for row in results:
+					LatB = row['latitude']
+					LngB = row['longitude']
+					distance_map[row['id']] = distance(LatA, LngA, LatB, LngB)
+
+
+				sorted_key_list = sorted(distance_map, key=distance_map.get)
+
+				mysql.connect(mysql_config)
+				item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (sorted_key_list[0]), schema)[0]
+				mysql.close()
+
+				contextOut = [{"name": "restaurants_recommended", "parameters": {
+				"lists": sorted_key_list,
+				"max": len(sorted_key_list), 
+				"current": 0,
+				"user_location": findContext(result["contexts"], 'user_asks4_restaurants_withunknownlocation')["parameters"]},
+				"lifespan": 3}]
+				res["contextOut"] = clearContexts(result.get("contexts"))
+				res["contextOut"].extend(contextOut)
+				# print sorted_key_list[0]
+				# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
+				# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
+				# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
+				speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(distance_map[sorted_key_list[0]]) + "km。\n 你喜欢嘛？"
+			else:
+				res["contextOut"] = clearContexts(result.get("contexts"))
+				speech = "哎呀，对不起，我找不到符合条件的餐馆。"
+		else:
+			speech = '哎呀！数据库出了点小问题！等我下！'
+
 	if action == 'query.restaurants.taste':
-		speech = answers_query_restaurants_taste[0] % (parameters.get('taste') + parameters.get('dish') + parameters.get('flavor'))
+		client = MongoClient()
+		db = client.wechat
+		if db.UserLocation.find({"user_id": req['user_id']}).count() >= 1:
+			speech = answers_query_restaurants_taste[1] % (parameters.get('taste') + parameters.get('dish') + parameters.get('flavor'))
+		else:
+			speech = answers_query_restaurants_taste[0] % (parameters.get('taste') + parameters.get('dish') + parameters.get('flavor'))
+		db.close()
 
 	if action == 'query.restaurants.unknownLocation':
 		address = result.get('resolvedQuery')
