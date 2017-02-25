@@ -559,8 +559,8 @@ def makeResponse2(req):
 			"wechat": [{
     				"title": '你来我家接我吧',
     				"description": '这是女神与高富帅之间的对话',
-    				"picurl": 'http://nodeapi.cloudfoundry.com/qrcode.jpg',
-    				"url": 'http://nodeapi.cloudfoundry.com/'
+    				"picurl": 'http://54.183.198.179/UploadedFaceImages/1483855032.jpg',
+    				#"url": 'http://nodeapi.cloudfoundry.com/'
   			}]
 		}
 		speech = "test..."
