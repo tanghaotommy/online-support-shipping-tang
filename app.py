@@ -557,10 +557,10 @@ def makeResponse2(req):
 	if action == 'test':
 		wechat = {
 			"wechat": [{
-    				title: '你来我家接我吧',
-    				description: '这是女神与高富帅之间的对话',
-    				picurl: 'http://nodeapi.cloudfoundry.com/qrcode.jpg',
-    				url: 'http://nodeapi.cloudfoundry.com/'
+    				"title": '你来我家接我吧',
+    				"description": '这是女神与高富帅之间的对话',
+    				"picurl": 'http://nodeapi.cloudfoundry.com/qrcode.jpg',
+    				"url": 'http://nodeapi.cloudfoundry.com/'
   			}]
 		}
 		speech = "test..."
