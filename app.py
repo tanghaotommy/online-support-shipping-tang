@@ -547,7 +547,11 @@ def makeResponse2(req):
 		client.close()
 		res["contextOut"] = [{"name": "user_asks4_restaurants_withtaste", "parameters": {
 		"taste.original": "",
-		"taste": "all"},
+		"taste": "all",
+		"dish": "",
+		"dish.original": "",
+		"flavor": "",
+		"flavor.original": ""},
 		"lifespan": 5}]
 
 	print("Response:" + str(speech))
