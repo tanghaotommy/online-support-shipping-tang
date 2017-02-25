@@ -39,6 +39,9 @@ answers_query_restaurants_taste = ['好的，%s是个很棒的选择哦。那你
 样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。（可以在公众号设置内允许我访问你的当前位置，这样以后就不用你输入地址啦！）', '好的，%s是个很棒的选择哦。\n那我使用你当前的位置进行查找可以嘛？\
 或者你直接打你所在的地址，也可以发送你当前位置。']
 answers_query_restaurants_unknownLocation = ['请问是%s嘛？', '对不起，我不知道这个是哪里。你能再说一遍么？']
+answers_query_restaurants_withoutTaste = ['好的，没问题，交给我来！\n那你能告诉我你的位置么？这\
+样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。（可以在公众号设置内允许我访问你的当前位置，这样以后就不用你输入地址啦！）', '好的，没问题，交给我来！\n那我使用你当前的位置进行查找可以嘛？\
+或者你直接打你所在的地址，也可以发送你当前位置。']
 
 class Mysql(object):
 
@@ -310,9 +313,6 @@ def makeResponse2(req):
 				res["contextOut"] = {"contextOut": contextOut}
 		print '123'
 
-	if action == 'query.restaurants.location':
-		speech = answers_query_restaurants_location[0]
-
 	if action == 'delete.unknownLocation':
 		speech = "好吧，那是哪里呀？"
 		res["contextOut"] = deleteContext(result["contexts"], "user_asks4_restaurants_withunknownlocation")
@@ -538,8 +538,13 @@ def makeResponse2(req):
 		#speech = result.get('resolvedQuery')
 
 	if action == 'query.restaurants.withoutTaste':
-		speech = '好的，没问题，交给我来！\n那你能告诉我你的位置么？这样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。'
-
+		client = MongoClient()
+		db = client.wechat
+		if db.UserLocation.find({"user_id": user_id}).count() >= 1:
+			speech = answers_query_restaurants_withoutTaste[1]
+		else:
+			speech = answers_query_restaurants_withoutTaste[0] 
+		client.close()
 		res["contextOut"] = [{"name": "user_asks4_restaurants_withtaste", "parameters": {
 		"taste.original": "",
 		"taste": "all"},
