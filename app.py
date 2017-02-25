@@ -564,7 +564,8 @@ def makeResponse2(req):
   			}]
 		}
 		speech = '<a href="http://54.183.198.179/UploadedFaceImages/1483855032.jpg">店面信息</a>'
-		res["data"] = wechat
+		#res["data"] = wechat
+                speech = "<a href='http://maps.google.com/maps?&z=10&q=34.0800231+-118.1026794'>a place</a>"
 
 	print("Response:" + str(speech))
 	res["speech"] = speech
