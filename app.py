@@ -554,6 +554,18 @@ def makeResponse2(req):
 		"flavor.original": ""},
 		"lifespan": 5}]
 
+	if action == 'test':
+		wechat = {
+			"wechat": [{
+    				title: '你来我家接我吧',
+    				description: '这是女神与高富帅之间的对话',
+    				picurl: 'http://nodeapi.cloudfoundry.com/qrcode.jpg',
+    				url: 'http://nodeapi.cloudfoundry.com/'
+  			}]
+		}
+		speech = "test..."
+		res["data"] = wechat
+
 	print("Response:" + str(speech))
 	res["speech"] = speech
 	res["displayText"] = speech
