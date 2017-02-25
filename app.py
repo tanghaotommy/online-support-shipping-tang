@@ -557,8 +557,8 @@ def makeResponse2(req):
 	if action == 'test':
 		wechat = {
 			"wechat": [{
-    				"title": '你来我家接我吧',
-    				"description": '这是女神与高富帅之间的对话',
+    				"title": '我觉得这家不错，你喜欢嘛？',
+    				"description": '店面信息',
     				"picurl": 'http://54.183.198.179/UploadedFaceImages/1483855032.jpg',
     				#"url": 'http://nodeapi.cloudfoundry.com/'
   			}]
