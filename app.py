@@ -558,12 +558,12 @@ def makeResponse2(req):
 		wechat = {
 			"wechat": [{
     				"title": '我觉得这家不错，你喜欢嘛？',
-    				"description": '店面信息',
+    				"description": '<a href="http://54.183.198.179/UploadedFaceImages/1483855032.jpg">店面信息</a>',
     				"picurl": 'http://54.183.198.179/UploadedFaceImages/1483855032.jpg',
-    				#"url": 'http://nodeapi.cloudfoundry.com/'
+    				"url": 'http://nodeapi.cloudfoundry.com/'
   			}]
 		}
-		speech = "test..."
+		speech = '<a href="http://54.183.198.179/UploadedFaceImages/1483855032.jpg">店面信息</a>'
 		res["data"] = wechat
 
 	print("Response:" + str(speech))
