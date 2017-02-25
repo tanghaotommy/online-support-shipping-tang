@@ -487,8 +487,8 @@ def makeResponse2(req):
 
 			LatA = item["latitude"]
 			LngA = item["longitude"]
-			LatB = user_location["location"]["location"]["lat"]
-			LngB = user_location["location"]["location"]["lng"]
+			LatB = float(user_location["location"]["location"]["lat"])
+			LngB = float(user_location["location"]["location"]["lng"])
 
 			_distance = distance(LatA, LngA, LatB, LngB)
 			speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(_distance) + "km。\n 你喜欢嘛？"
