@@ -373,7 +373,7 @@ def makeResponse2(req):
 				"lists": sorted_key_list,
 				"max": len(sorted_key_list), 
 				"current": 0,
-				"user_location": {"location": {"location": location}}},
+				"user_location": {"location": {"location": {"lat": location['latitude'], "lng": location['longitude']}}}},
 				"lifespan": 3}]
 				res["contextOut"] = clearContexts(result.get("contexts"))
 				res["contextOut"].extend(contextOut)
