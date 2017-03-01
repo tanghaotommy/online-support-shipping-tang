@@ -396,7 +396,7 @@ def makeResponse2(req):
 		print LatA
 		print LngA
 		client.close()
-		speech, res['contextOut'] = getRestaurantsList(LatA, LngB, restul.get("contexts"))
+		speech, res['contextOut'] = getRestaurantsList(LatA, LngA, restul.get("contexts"))
 
 
 	if action == 'query.restaurants.taste':
@@ -437,7 +437,7 @@ def makeResponse2(req):
 				LatA = context['parameters']['location']['location']['lat']
 				LngA = context['parameters']['location']['location']['lng']
 				break
-		speech, res['contextOut'] = getRestaurantsList(LatA, LngB, restul.get("contexts"))
+		speech, res['contextOut'] = getRestaurantsList(LatA, LngA, restul.get("contexts"))
 
 	if action == 'query.restaurants.next':
 		context = findContext(result["contexts"], "restaurants_recommended")
