@@ -223,7 +223,7 @@ def googleGeocode(req):
 	res["source"] = "shokse-restaurants-recommendation"
 	return res
 
-def getRestaurantsList(LatA, LngA, contexts):
+def getRestaurantsList(LatA, LngA, contexts, taste, dish):
 	mysql = Mysql()
 	if(mysql.connect(mysql_config) == None):
 		schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
@@ -396,7 +396,7 @@ def makeResponse2(req):
 		print LatA
 		print LngA
 		client.close()
-		speech, res['contextOut'] = getRestaurantsList(LatA, LngA, restul.get("contexts"))
+		speech, res['contextOut'] = getRestaurantsList(LatA, LngA, result.get("contexts"), taste, dish)
 
 
 	if action == 'query.restaurants.taste':
@@ -437,7 +437,7 @@ def makeResponse2(req):
 				LatA = context['parameters']['location']['location']['lat']
 				LngA = context['parameters']['location']['location']['lng']
 				break
-		speech, res['contextOut'] = getRestaurantsList(LatA, LngA, restul.get("contexts"))
+		speech, res['contextOut'] = getRestaurantsList(LatA, LngA, result.get("contexts"), taste, dish)
 
 	if action == 'query.restaurants.next':
 		context = findContext(result["contexts"], "restaurants_recommended")
