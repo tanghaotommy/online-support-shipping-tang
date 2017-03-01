@@ -260,9 +260,16 @@ def makeResponse2(req):
 	speech = '出错啦！！！'
 
 	if action == 'query.taste':
+		taste = parameters["taste"].encode('utf-8')
+		dish = parameters["dish"].encode('utf-8')
+		flavor = parameters["flavor"].encode('utf-8')
+		speech = answers_query_taste[random.randint(0, len(answers_query_taste) - 1)] % (taste + dish + flavor)
+
+	if action == 'query.taste.positive':
 		taste = findContext(result["contexts"], "user_mentions_taste")["parameters"]["taste"].encode('utf-8')
 		dish = findContext(result["contexts"], "user_mentions_taste")["parameters"]["dish"].encode('utf-8')
 		flavor = findContext(result["contexts"], "user_mentions_taste")["parameters"]["flavor"].encode('utf-8')
+		client = MongoClient()
 		contextOut = {"name": "user_asks4_restaurants_withTaste", 
 		"parameters": {
 			"taste": taste,
@@ -271,13 +278,6 @@ def makeResponse2(req):
 		"lifespan": 5}
 		res["contextOut"] = clearContexts(result.get("contexts"))
 		res["contextOut"].append(contextOut)
-		speech = answers_query_taste[random.randint(0, len(answers_query_taste) - 1)] % (taste + dish + flavor)
-
-	if action == 'query.taste.positive':
-		taste = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["taste"].encode('utf-8')
-		dish = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["dish"].encode('utf-8')
-		flavor = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["flavor"].encode('utf-8')
-		client = MongoClient()
 		db = client.wechat
 		if db.UserLocation.find({"user_id": user_id}).count() >= 1:
 			speech = answers_query_restaurants_taste[1] % (parameters.get('taste') + parameters.get('dish') + parameters.get('flavor'))
