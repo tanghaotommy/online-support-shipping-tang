@@ -43,6 +43,7 @@ answers_query_restaurants_unknownLocation = ['请问是%s嘛？', '对不起，�
 answers_query_restaurants_withoutTaste = ['好的，没问题，交给我来！\n那你能告诉我你的位置么？这\
 样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。（可以在公众号设置内允许我访问你的当前位置，这样以后就不用你输入地址啦！）', '好的，没问题，交给我来！\n那我使用你当前的位置进行查找可以嘛？\
 或者你直接打你所在的地址，也可以发送你当前位置。']
+answers_query_taste = ['你是想让我给你推荐%s嘛？', '你是想吃%s嘛？']
 
 class Mysql(object):
 
@@ -257,6 +258,32 @@ def makeResponse2(req):
 	res = {}
 	print action
 	speech = '出错啦！！！'
+
+	if action == 'query.taste':
+		taste = findContext(result["contexts"], "user_mentions_taste")["parameters"]["taste"].encode('utf-8')
+		dish = findContext(result["contexts"], "user_mentions_taste")["parameters"]["dish"].encode('utf-8')
+		flavor = findContext(result["contexts"], "user_mentions_taste")["parameters"]["flavor"].encode('utf-8')
+		contextOut = {"name": "user_asks4_restaurants_withTaste", 
+		"parameters": {
+			"taste": taste,
+			"dish": dish,
+			"flavor": flavor},
+		"lifespan": 5}
+		res["contextOut"] = clearContexts(result.get("contexts"))
+		res["contextOut"].append(contextOut)
+		speech = answers_query_taste[random.randint(0, len(answers_query_taste) - 1)] % (taste + dish + flavor)
+
+	if action == 'query.taste.positive':
+		taste = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["taste"].encode('utf-8')
+		dish = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["dish"].encode('utf-8')
+		flavor = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["flavor"].encode('utf-8')
+		client = MongoClient()
+		db = client.wechat
+		if db.UserLocation.find({"user_id": user_id}).count() >= 1:
+			speech = answers_query_restaurants_taste[1] % (parameters.get('taste') + parameters.get('dish') + parameters.get('flavor'))
+		else:
+			speech = answers_query_restaurants_taste[0] % (parameters.get('taste') + parameters.get('dish') + parameters.get('flavor'))
+		client.close()
 
 	if action == 'query.restaurant':
 		restaurant = parameters['restaurant_chinese']
