@@ -265,6 +265,8 @@ def makeResponse2(req):
 		flavor = parameters["flavor"].encode('utf-8')
 		speech = answers_query_taste[random.randint(0, len(answers_query_taste) - 1)] % (taste + dish + flavor)
 		res['contextOut'] = clearContexts(result.get("contexts"))
+		res['contextOut'] = extendContext(res['contextOut'], "user_mentions_taste", 3)
+
 
 	if action == 'query.taste.positive':
 		taste = findContext(result["contexts"], "user_mentions_taste")["parameters"]["taste"].encode('utf-8')
