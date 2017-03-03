@@ -30,6 +30,8 @@ mysql_config = config = {
   'host': 'newdatabase.cii5tvbuf3ji.us-west-1.rds.amazonaws.com',
   'database': 'RestaurantsRecommendation'
 }
+restaurant_schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
+'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
 flavor_taste = {
 	'辣的': '川菜',
 	'甜的': '上海菜'
@@ -256,6 +258,69 @@ def findContext(contexts, name):
 			return context
 	return None
 
+def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_address = ""):
+	contextOut = []
+	taste = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["taste"]
+	if taste == '': taste = '-1'
+	dish = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["dish"]
+	if dish == '': dish = '-1'
+	flavor = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["flavor"].encode('utf-8')
+	print flavor
+	print flavor_taste
+	if flavor_taste.has_key(flavor):
+		taste = flavor_taste[flavor]
+	mysql = Mysql()
+	if(mysql.connect(mysql_config) == None):
+		if taste == "all":
+			results = mysql.query("SELECT * FROM Restaurants", restaurant_schema)
+		else:
+			results = mysql.query("SELECT * FROM Restaurants WHERE type LIKE '%%%s%%' OR signature LIKE '%%%s%%'" % (taste, dish), restaurant_schema)
+		mysql.close()
+		# print 'LatA' + str(LatA)
+		# print 'LngA' + str(LngA)
+		if len(results) > 0:
+			distance_map = {}
+			for row in results:
+				LatB = row['latitude']
+				LngB = row['longitude']
+				dist = distance(LatA, LngA, LatB, LngB)
+				if dist <= MAXDISTANCE:
+					distance_map[row['id']] = dist
+
+			sorted_key_list = sorted(distance_map, key=distance_map.get)
+
+			if len(sorted_key_list) >= 1:
+				mysql.connect(mysql_config)
+				item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (sorted_key_list[0]), restaurant_schema)[0]
+				mysql.close()
+
+				context = [{"name": "restaurants_recommended", "parameters": {
+				"lists": sorted_key_list,
+				"max": len(sorted_key_list), 
+				"current": 0,
+				"user_location": {
+					"location.original": location_original,
+					"location": {
+						"formatted_address": formatted_address,
+						"location": {"lat": LatA, "lng": LngA}}}},
+				"lifespan": 3}]
+				contextOut = clearContexts(contexts)
+				contextOut.extend(context)
+				# print sorted_key_list[0]
+				# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
+				# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
+				# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
+				speech = answers_query_restaurants_show[0] % (item['name_cn'], item['name_en'], item['signature'], str(distance_map[sorted_key_list[0]]))
+			else:
+				contextOut = clearContexts(result.get("contexts"))
+				speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"
+		else:
+			contextOut = clearContexts(result.get("contexts"))
+			speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"
+	else:
+		speech = '哎呀！数据库出了点小问题！等我下！'
+	return speech, contextOut
+
 def makeResponse2(req):
 	action = req.get("result").get("action")
 	result = req.get("result")
@@ -269,15 +334,12 @@ def makeResponse2(req):
 		context = findContext(result["contexts"], "restaurants_recommended")
 		lists = context["parameters"]["lists"]
 		current = context["parameters"]["current"]
-		schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
-'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
-		
 		user_location = context["parameters"]["user_location"]
 		if current > 0:
 			current -= 1
 			mysql = Mysql()
 			mysql.connect(mysql_config)
-			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), schema)[0]
+			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
 			mysql.close()
 
 			LatA = item["latitude"]
@@ -301,7 +363,7 @@ def makeResponse2(req):
 
 			mysql = Mysql()
 			mysql.connect(mysql_config)
-			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), schema)[0]
+			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
 			mysql.close()
 
 			LatA = item["latitude"]
@@ -348,9 +410,7 @@ def makeResponse2(req):
 			mysql = Mysql()
 			mysql.connect(mysql_config)
 			print restaurant
-			schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
-'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
-			results = mysql.query("SELECT * FROM Restaurants WHERE name_en = '%s'" % (restaurant), schema)
+			results = mysql.query("SELECT * FROM Restaurants WHERE name_en = '%s'" % (restaurant), restaurant_schema)
 			if len(results) >= 1:
 				speech = "你说的一定是" + results[0]['name_cn'] + "。它在" + results[0]['address'] + "。他们家的招牌菜是" + results[0]['signature'] + "。我说的对不对呀！"
 			else:
@@ -407,76 +467,18 @@ def makeResponse2(req):
 			res["contextOut"] = clearContexts(result.get("contexts"))
 
 	if action == 'query.restaurants.location':
-		#same as query.restaurants.show
-		taste = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["taste"]
-		if taste == '': taste = '-1'
-		dish = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["dish"]
-		if dish == '': dish = '-1'
-		flavor = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["flavor"].encode('utf-8')
-		print flavor
-		print flavor_taste
-		if flavor_taste.has_key(flavor):
-			taste = flavor_taste[flavor]
-		mysql = Mysql()
-		if(mysql.connect(mysql_config) == None):
-			schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
-'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
-			if taste == "all":
-				results = mysql.query("SELECT * FROM Restaurants", schema)
-			else:
-				results = mysql.query("SELECT * FROM Restaurants WHERE type LIKE '%%%s%%' OR signature LIKE '%%%s%%'" % (taste, dish), schema)
-			mysql.close()
-
-			client = MongoClient()
-			db = client.wechat
-			document = db.UserLocation.find({"user_id": user_id})[0]
-			print document
-			location = document['location']
-			print location
-			LatA = float(location['latitude'])
-			LngA = float(location['longitude'])
-			print LatA
-			print LngA
-			client.close()
-			# print 'LatA' + str(LatA)
-			# print 'LngA' + str(LngA)
-			if len(results) > 0:
-				distance_map = {}
-				for row in results:
-					LatB = row['latitude']
-					LngB = row['longitude']
-					dist = distance(LatA, LngA, LatB, LngB)
-					if dist <= MAXDISTANCE:
-						distance_map[row['id']] = dist
-
-
-				sorted_key_list = sorted(distance_map, key=distance_map.get)
-				if len(sorted_key_list) >= 1:
-					mysql.connect(mysql_config)
-					item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (sorted_key_list[0]), schema)[0]
-					mysql.close()
-
-					contextOut = [{"name": "restaurants_recommended", "parameters": {
-					"lists": sorted_key_list,
-					"max": len(sorted_key_list), 
-					"current": 0,
-					"user_location": {"location": {"location": {"lat": location['latitude'], "lng": location['longitude']}}}},
-					"lifespan": 3}]
-					res["contextOut"] = clearContexts(result.get("contexts"))
-					res["contextOut"].extend(contextOut)
-					# print sorted_key_list[0]
-					# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
-					# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
-					# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
-					speech = answers_query_restaurants_show[0] % (item['name_cn'], item['name_en'], item['signature'], str(distance_map[sorted_key_list[0]]))
-				else:
-					res["contextOut"] = clearContexts(result.get("contexts"))
-					speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"					
-			else:
-				res["contextOut"] = clearContexts(result.get("contexts"))
-				speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"
-		else:
-			speech = '哎呀！数据库出了点小问题！等我下！'
+		client = MongoClient()
+		db = client.wechat
+		document = db.UserLocation.find({"user_id": user_id})[0]
+		print document
+		location = document['location']
+		print location
+		LatA = float(location['latitude'])
+		LngA = float(location['longitude'])
+		print LatA
+		print LngA
+		client.close()
+		speech, res['contextOut'] = getRestaurants(LatA=LatA, LngA=LngA, contexts=result.get("contexts"))
 
 	if action == 'query.restaurants.taste':
 		client = MongoClient()
@@ -502,82 +504,24 @@ def makeResponse2(req):
 			speech = answers_query_restaurants_unknownLocation[1]
 
 	if action == 'query.restaurants.show':
-		taste = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["taste"]
-		if taste == '': taste = '-1'
-		dish = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["dish"]
-		if dish == '': dish = '-1'
-		flavor = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["flavor"].encode('utf-8')
-		print flavor
-		print flavor_taste
-		if flavor_taste.has_key(flavor):
-			taste = flavor_taste[flavor]
-		mysql = Mysql()
-		if(mysql.connect(mysql_config) == None):
-			schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
-'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
-			if taste == "all":
-				results = mysql.query("SELECT * FROM Restaurants", schema)
-			else:
-				results = mysql.query("SELECT * FROM Restaurants WHERE type LIKE '%%%s%%' OR signature LIKE '%%%s%%'" % (taste, dish), schema)
-			mysql.close()
-			for context in result.get('contexts'):
-				if context['name'] == 'user_asks4_restaurants_withunknownlocation':
-					LatA = context['parameters']['location']['location']['lat']
-					LngA = context['parameters']['location']['location']['lng']
-					break
-
-			# print 'LatA' + str(LatA)
-			# print 'LngA' + str(LngA)
-			if len(results) > 0:
-				distance_map = {}
-				for row in results:
-					LatB = row['latitude']
-					LngB = row['longitude']
-					dist = distance(LatA, LngA, LatB, LngB)
-					if dist <= MAXDISTANCE:
-						distance_map[row['id']] = dist
-
-				sorted_key_list = sorted(distance_map, key=distance_map.get)
-
-				if len(sorted_key_list) >= 1:
-					mysql.connect(mysql_config)
-					item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (sorted_key_list[0]), schema)[0]
-					mysql.close()
-
-					contextOut = [{"name": "restaurants_recommended", "parameters": {
-					"lists": sorted_key_list,
-					"max": len(sorted_key_list), 
-					"current": 0,
-					"user_location": findContext(result["contexts"], 'user_asks4_restaurants_withunknownlocation')["parameters"]},
-					"lifespan": 3}]
-					res["contextOut"] = clearContexts(result.get("contexts"))
-					res["contextOut"].extend(contextOut)
-					# print sorted_key_list[0]
-					# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
-					# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
-					# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
-					speech = answers_query_restaurants_show[0] % (item['name_cn'], item['name_en'], item['signature'], str(distance_map[sorted_key_list[0]]))
-				else:
-					res["contextOut"] = clearContexts(result.get("contexts"))
-					speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"
-			else:
-				res["contextOut"] = clearContexts(result.get("contexts"))
-				speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"
-		else:
-			speech = '哎呀！数据库出了点小问题！等我下！'
+		for context in result.get('contexts'):
+			if context['name'] == 'user_asks4_restaurants_withunknownlocation':
+				LatA = context['parameters']['location']['location']['lat']
+				LngA = context['parameters']['location']['location']['lng']
+				break
+		speech, res['contextOut'] = getRestaurants(LatA=LatA, LngA=LngA, contexts=result.get("contexts"), 
+			formatted_address=context['parameters']['location']['formatted_address'], 
+			location_original=context['parameters']['location.original'])
 
 	if action == 'query.restaurants.next':
 		context = findContext(result["contexts"], "restaurants_recommended")
 		lists = context["parameters"]["lists"]
 		current = context["parameters"]["current"] + 1
-		schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
-'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
-		
 		user_location = context["parameters"]["user_location"]
 		if current < context["parameters"]["max"] - 1:
 			mysql = Mysql()
 			mysql.connect(mysql_config)
-			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), schema)[0]
+			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
 			mysql.close()
 
 			LatA = item["latitude"]
@@ -600,7 +544,7 @@ def makeResponse2(req):
 
 			mysql = Mysql()
 			mysql.connect(mysql_config)
-			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), schema)[0]
+			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
 			mysql.close()
 
 			LatA = item["latitude"]
@@ -617,9 +561,7 @@ def makeResponse2(req):
 		current = context["parameters"]["current"]
 		mysql = Mysql()
 		mysql.connect(mysql_config)
-		schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
-'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
-		item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), schema)[0]
+		item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
 		mysql.close()
 
 		res["contextOut"] = clearContexts(result.get("contexts"))
