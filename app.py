@@ -467,7 +467,7 @@ def makeResponse2(req):
 					# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
 					# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
 					# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
-					speech = answers_query_restaurants_show % (item['name_cn'], item['name_en'], item['signature'], str(distance_map[sorted_key_list[0]]))
+					speech = answers_query_restaurants_show[0] % (item['name_cn'], item['name_en'], item['signature'], str(distance_map[sorted_key_list[0]]))
 				else:
 					res["contextOut"] = clearContexts(result.get("contexts"))
 					speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"					
