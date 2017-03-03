@@ -44,8 +44,8 @@ answers_query_restaurants_withoutTaste = ['好的，没问题，交给我来！\
 样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。（可以在公众号设置内允许我访问你的当前位置，这样以后就不用你输入地址啦！）', '好的，没问题，交给我来！\n那我使用你当前的位置进行查找可以嘛？\
 或者你直接打你所在的地址，也可以发送你当前位置。']
 answers_query_taste = ['你是想让我给你推荐%s嘛？', '你是想吃%s嘛？']
-answers_query_restaurants_closer = ['对不起啊，我找不到更近的餐馆了。最近的就是这家叫%s（%s）的。它的招牌菜是%s。您距离它有%skm。\n你喜欢嘛？', 
-'我觉得这家叫%s（%s）的感觉不错。它的招牌菜是%s。\n您距离它有%skm。\n你喜欢嘛?']
+answers_query_restaurants_closer = ['我觉得这家叫%s（%s）的感觉不错。它的招牌菜是%s。\n您距离它有%skm。\n你喜欢嘛?', 
+'对不起啊，我找不到更近的餐馆了。最近的就是这家叫%s（%s）的。它的招牌菜是%s。您距离它有%skm。\n你喜欢嘛？']
 answers_query_restaurants_show = ['我觉得这家叫%s（%s）的感觉不错。它的招牌菜是%s。\n您距离它有%skm。\n你喜欢嘛?']
 answers_query_restaurants_moreInformation = ["他们家的地址是%s。\n人均大概在$%s左右。"]
 answers_query_restaurants_next = [answers_query_restaurants_show[0], "我没有更多的啦，只能从头再开始一遍咯！\n" + answers_query_restaurants_show[0]]
@@ -265,7 +265,7 @@ def makeResponse2(req):
 	speech = '出错啦！！！'
 
 	if action == 'query.restaurants.closer':
-		context = findContext(result["contexts"], "restaurants_recommended")["parameters"]
+		context = findContext(result["contexts"], "restaurants_recommended")
 		lists = context["parameters"]["lists"]
 		current = context["parameters"]["current"]
 		schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
