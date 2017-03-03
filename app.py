@@ -104,14 +104,13 @@ class Mysql(object):
 
 # Flask app should start in global layout
 app = Flask(__name__)
-print ('嘿嘿')
 
 @app.route('/user_location', methods=['POST'])
 def user_location():
 	req = request.get_json(silent=True, force=True)
 
-	print("Request to user_location:")
-	print(json.dumps(req, indent=4))
+	print("Request received from WeChat to in user_location.")
+	#print(json.dumps(req, indent=4))
 
 	res = "Success"
 
@@ -121,16 +120,16 @@ def user_location():
 	if db.UserLocation.find({"user_id": req['user_id']}).count() >= 1:
 		#db.UserLocation.update({"user_id": req['user_id']}, {"user_id": req['user_id'], "timestamp": time.time(), "location": {"latitude": req['latitude'], "longitude": req['longitude']}})
 		db.UserLocation.update({"user_id": req['user_id']}, {"$set": {"timestamp": time.time(), "location": {"latitude": req['latitude'], "longitude": req['longitude']}}})
-		print "Update user location!"
+		print "Update location of user: %s!" % (req['user_id'])
 	else:
 		db.UserLocation.insert_one({"user_id": req['user_id'], "timestamp": time.time(), "location": {"latitude": req['latitude'], "longitude": req['longitude']}})
-		print "Insert user location!"
+		print "Insert location of user: %s!" % (req['user_id'])
 	client.close()
 	# user_location = db.UserLocation.find({"user_id": req['user_id']},{"_id": False})[0]
 	# print user_location
 
 	res = json.dumps(res, indent=4)
-	print(res)
+	print "Response: ", res 
 	r = make_response(res)
 	r.headers['Content-Type'] = 'application/json'
 	return r
@@ -169,13 +168,13 @@ def smarthome():
 def check_location():
    
     req = request.get_json(silent=True, force=True)
-    print("RequestFromWeChat User Location:")
+    print("Request received from WeChat in check_location.")
     print(json.dumps(req, indent=4))
 
     res = googleGeocode(req)
 
     res = json.dumps(res, indent=4)
-    print(res)
+    print "Response: ", res
     r = make_response(res)
     r.headers['Content-Type'] = 'application/json'
     return r
@@ -184,13 +183,13 @@ def check_location():
 def restaurantsRec():
     req = request.get_json(silent=True, force=True)
 
-    print("Request:")
-    print(json.dumps(req, indent=4))
+    print("Request received from Api.ai in restaurantsRec")
+    #print(json.dumps(req, indent=4))
 
     res = makeResponse2(req)
-
     res = json.dumps(res, indent=4)
-    print(res)
+ 	#print(res)
+
     r = make_response(res)
     r.headers['Content-Type'] = 'application/json'
     return r
@@ -215,12 +214,12 @@ def googleGeocode(req):
 	longitude = req['longitude']
 	address = str(latitude) + " " + str(longitude)
 	address = re.sub(" ", '+', address)
-	print address
+	#print address
 	url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=%s"
 	url = url % (address, GOOGLEMAPS_API_KEY)
 	r = requests.get(url)
 	response = r.json()
-	print response
+	#print response
 	res = {}
 	if response['status'] == 'OK':
 		formatted_address = response['results'][0]['formatted_address']
@@ -265,8 +264,8 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 	dish = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["dish"]
 	if dish == '': dish = '-1'
 	flavor = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["flavor"].encode('utf-8')
-	print flavor
-	print flavor_taste
+	print "taste: %s, " % (str(taste)), "dish: %s, ", % (str(dish)), "flavor: %s" % (str(flavor))
+	#print flavor_taste
 	if flavor_taste.has_key(flavor):
 		taste = flavor_taste[flavor]
 	mysql = Mysql()
@@ -327,7 +326,7 @@ def makeResponse2(req):
 	user_id = req.get("sessionId")
 	parameters = result.get("parameters")
 	res = {}
-	print action
+	print "Action: ", action
 	speech = '出错啦！！！'
 
 	if action == 'query.restaurants.closer':
@@ -456,7 +455,7 @@ def makeResponse2(req):
 				res["contextOut"].extend(contextOut)
 			else:
 				res["contextOut"] = {"contextOut": contextOut}
-		print '123'
+		#print '123'
 
 	if action == 'delete.unknownLocation':
 		speech = "好吧，那是哪里呀？"
@@ -470,13 +469,14 @@ def makeResponse2(req):
 		client = MongoClient()
 		db = client.wechat
 		document = db.UserLocation.find({"user_id": user_id})[0]
-		print document
+		#print document
 		location = document['location']
-		print location
+		#print location
 		LatA = float(location['latitude'])
 		LngA = float(location['longitude'])
-		print LatA
-		print LngA
+		#print LatA
+		#print LngA
+		print "User %s is at: %s" % (str(user_id), str(location)) 
 		client.close()
 		speech, res['contextOut'] = getRestaurants(LatA=LatA, LngA=LngA, contexts=result.get("contexts"))
 
