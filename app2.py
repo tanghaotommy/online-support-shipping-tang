@@ -262,7 +262,7 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 	if taste == '': taste = '-1'
 	dish = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["dish"]
 	if dish == '': dish = '-1'
-	flavor = findContext(result["contexts"], "user_asks4_restaurants_withtaste")["parameters"]["flavor"].encode('utf-8')
+	flavor = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["flavor"].encode('utf-8')
 	print flavor
 	print flavor_taste
 	if flavor_taste.has_key(flavor):
@@ -304,7 +304,7 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 						"formatted_address": formatted_address,
 						"location": {"lat": LatA, "lng": LngA}}}},
 				"lifespan": 3}]
-				contextOut = clearContexts(result.get("contexts"))
+				contextOut = clearContexts(contexts)
 				contextOut.extend(context)
 				# print sorted_key_list[0]
 				# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
@@ -515,7 +515,7 @@ def makeResponse2(req):
 				LngA = context['parameters']['location']['location']['lng']
 				break
 		speech, res['contextOut'] = getRestaurants(LatA=LatA, LngA=LngA, contexts=result.get("contexts"), 
-			formatted_address=context['parameters']['location']['formatted_string'], 
+			formatted_address=context['parameters']['location']['formatted_address'], 
 			location_original=context['parameters']['location.original'])
 
 	if action == 'query.restaurants.next':
