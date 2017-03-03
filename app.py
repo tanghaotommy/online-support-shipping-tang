@@ -44,6 +44,11 @@ answers_query_restaurants_withoutTaste = ['好的，没问题，交给我来！\
 样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。（可以在公众号设置内允许我访问你的当前位置，这样以后就不用你输入地址啦！）', '好的，没问题，交给我来！\n那我使用你当前的位置进行查找可以嘛？\
 或者你直接打你所在的地址，也可以发送你当前位置。']
 answers_query_taste = ['你是想让我给你推荐%s嘛？', '你是想吃%s嘛？']
+answers_query_restaurants_closer = ['对不起啊，我找不到更近的餐馆了。最近的就是这家叫%s（%s）的。它的招牌菜是%s。您距离它有%skm。\n你喜欢嘛？', 
+'我觉得这家叫%s（%s）的感觉不错。它的招牌菜是%s。\n您距离它有%skm。\n你喜欢嘛?']
+answers_query_restaurants_show = ['我觉得这家叫%s（%s）的感觉不错。它的招牌菜是%s。\n您距离它有%skm。\n你喜欢嘛?']
+answers_query_restaurants_moreInformation = ["他们家的地址是%s。\n人均大概在$%s左右。"]
+answers_query_restaurants_next = [answers_query_restaurants_show[0], "我没有更多的啦，只能从头再开始一遍咯！\n" + answers_query_restaurants_show[0]]
 
 class Mysql(object):
 
@@ -259,6 +264,54 @@ def makeResponse2(req):
 	print action
 	speech = '出错啦！！！'
 
+	if action == 'query.restaurants.closer':
+		context = findContext(result["contexts"], "restaurants_recommended")["parameters"]
+		lists = context["parameters"]["lists"]
+		current = context["parameters"]["current"]
+		schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
+'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
+		
+		user_location = context["parameters"]["user_location"]
+		if current > 0:
+			current -= 1
+			mysql = Mysql()
+			mysql.connect(mysql_config)
+			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), schema)[0]
+			mysql.close()
+
+			LatA = item["latitude"]
+			LngA = item["longitude"]
+			LatB = float(user_location["location"]["location"]["lat"])
+			LngB = float(user_location["location"]["location"]["lng"])
+
+			_distance = distance(LatA, LngA, LatB, LngB)
+			speech = answers_query_restaurants_closer[0] % (item['name_cn'], item['name_en'], item['signature'], str(_distance))
+			
+			context["parameters"]["current"] = current
+			contextOut = [{"name": "restaurants_recommended", "parameters": context["parameters"], "lifespan": 3}]
+			res["contextOut"] = clearContexts(result.get("contexts"))
+			res["contextOut"].extend(contextOut)
+		else:
+			current = 0
+			context["parameters"]["current"] = current
+			contextOut = [{"name": "restaurants_recommended", "parameters": context["parameters"], "lifespan": 3}]
+			res["contextOut"] = clearContexts(result.get("contexts"))
+			res["contextOut"].extend(contextOut)
+
+			mysql = Mysql()
+			mysql.connect(mysql_config)
+			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), schema)[0]
+			mysql.close()
+
+			LatA = item["latitude"]
+			LngA = item["longitude"]
+			LatB = float(user_location["location"]["location"]["lat"])
+			LngB = float(user_location["location"]["location"]["lng"])
+
+			_distance = distance(LatA, LngA, LatB, LngB)
+			speech = answers_query_restaurants_closer[1] % (item['name_cn'], item['name_en'], item['signature'], str(_distance))
+
+
 	if action == 'query.taste':
 		taste = parameters["taste"].encode('utf-8')
 		dish = parameters["dish"].encode('utf-8')
@@ -414,7 +467,7 @@ def makeResponse2(req):
 					# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
 					# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
 					# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
-					speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(distance_map[sorted_key_list[0]]) + "km。\n 你喜欢嘛？"
+					speech = answers_query_restaurants_show % (item['name_cn'], item['name_en'], item['signature'], str(_distance))
 				else:
 					res["contextOut"] = clearContexts(result.get("contexts"))
 					speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"					
@@ -502,7 +555,7 @@ def makeResponse2(req):
 					# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
 					# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
 					# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
-					speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(distance_map[sorted_key_list[0]]) + "km。\n 你喜欢嘛？"
+					speech = answers_query_restaurants_show % (item['name_cn'], item['name_en'], item['signature'], str(_distance))
 				else:
 					res["contextOut"] = clearContexts(result.get("contexts"))
 					speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"
@@ -532,8 +585,7 @@ def makeResponse2(req):
 			LngB = float(user_location["location"]["location"]["lng"])
 
 			_distance = distance(LatA, LngA, LatB, LngB)
-			speech = "我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(_distance) + "km。\n 你喜欢嘛？"
-			
+			speech = answers_query_restaurants_next[0] % (item['name_cn'], item['name_en'], item['signature'], str(_distance))
 			context["parameters"]["current"] = current
 			contextOut = [{"name": "restaurants_recommended", "parameters": context["parameters"], "lifespan": 3}]
 			res["contextOut"] = clearContexts(result.get("contexts"))
@@ -556,8 +608,8 @@ def makeResponse2(req):
 			LngB = float(user_location["location"]["location"]["lng"])
 
 			_distance = distance(LatA, LngA, LatB, LngB)
-			speech = "我没有更多的啦，只能从头再开始一遍咯！\n我觉得这家叫" + item['name_cn'] + "的感觉不错。它在" + item['address'] + '\n' + "您距离它有" + str(_distance) + "km。\n 你喜欢嘛？"
-	
+			speech = answers_query_restaurants_next[1] % (item['name_cn'], item['name_en'], item['signature'], str(_distance))	
+
 	if action == 'query.restaurants.moreInformation':
 		context = findContext(result["contexts"], "restaurants_recommended")
 		lists = context["parameters"]["lists"]
@@ -575,7 +627,7 @@ def makeResponse2(req):
 		"lifespan": 3}]
 		res["contextOut"].extend(contextOut)
 
-		speech = "他们家的招牌菜是" + item["signature"] + "。\n" + "人均大概在$" + item["price_average"] + "左右。"
+		speech = answers_query_restaurants_moreInformation[0] % (item["address"], item["price_average"])
 		#speech = result.get('resolvedQuery')
 
 	if action == 'query.restaurants.withoutTaste':
