@@ -264,7 +264,7 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 	dish = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["dish"]
 	if dish == '': dish = '-1'
 	flavor = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["flavor"].encode('utf-8')
-	print "taste: %s, " % (str(taste)), "dish: %s, ", % (str(dish)), "flavor: %s" % (str(flavor))
+	print "taste: %s, " % (str(taste)), "dish: %s, " % (str(dish)), "flavor: %s" % (str(flavor))
 	#print flavor_taste
 	if flavor_taste.has_key(flavor):
 		taste = flavor_taste[flavor]
@@ -603,7 +603,7 @@ def makeResponse2(req):
 		#res["data"] = wechat
                 speech = "<a href='http://maps.google.com/maps?&z=10&q=34.0800231+-118.1026794'>a place</a>"
 
-	print("Response:" + str(speech))
+	print("Response: " + str(speech))
 	res["speech"] = speech
 	res["displayText"] = speech
 	res["source"] = "shokse-restaurants-recommendation"
