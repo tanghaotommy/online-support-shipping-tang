@@ -7,7 +7,7 @@ then
 fi
 if [ $num == 0 ]
 then
-    nohup python -u app.py >log 2>&1 &
+    nohup python -u app.py 1>log 2>error &
     echo $! > ./app.pid
     echo 'Started!'
 else
