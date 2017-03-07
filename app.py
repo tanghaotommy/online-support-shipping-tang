@@ -41,9 +41,9 @@ answers_query_restaurants = ['Hello客官你来啦(づ￣3￣)づ╭❤～\n今�
 
 answers_query_restaurants_location = ['好的，请稍等！正在搜寻中！']
 
-answers_query_restaurants_taste = ['好的，%s是个很棒的选择哦。那你能告诉我你的位置么？这\
+answers_query_restaurants_taste = ['%s是个很棒的选择哦[CoolGuy][CoolGuy]。那你能告诉我你的位置么？这\
 样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。（可以在公众号设置内允许我访问你的当前位置，这样以后就不用你输入地址啦！）',
-'%s是个很棒的选择哦。\n好的宝贝~我已经检测到你当前的地址啦O(∩_∩)O~，可以直接使用它进行查找嘛？[Laugh][Laugh][Laugh]\n或者你也可以输入其他地址哦！']
+'%s是个很棒的选择哦[CoolGuy][CoolGuy]。\n好的宝贝~我已经检测到你当前的地址啦O(∩_∩)O~，可以直接使用它进行查找嘛？[Laugh][Laugh][Laugh]\n或者你也可以输入其他地址哦！']
 
 answers_query_restaurants_unknownLocation = ['请问是%s嘛？~', '对不起，我不知道这个是哪里。你能再说一遍么？']
 
