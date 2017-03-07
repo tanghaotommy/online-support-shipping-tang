@@ -37,21 +37,30 @@ flavor_taste = {
 	'甜的': '上海菜'
 }
 
-answers_query_restaurants = ['你喜欢哪种口味的菜？（比如川菜，粤菜，火锅，上海菜，粥等等）', '你喜欢哪种风格的菜？（比如川菜，粤菜，火锅，上海菜，粥等等）']
+answers_query_restaurants = ['Hello客官你来啦(づ￣3￣)づ╭❤～\n今天想试一试哪种风格的美食呢？']
+
 answers_query_restaurants_location = ['好的，请稍等！正在搜寻中！']
+
 answers_query_restaurants_taste = ['好的，%s是个很棒的选择哦。那你能告诉我你的位置么？这\
-样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。（可以在公众号设置内允许我访问你的当前位置，这样以后就不用你输入地址啦！）', '好的，%s是个很棒的选择哦。\n那我使用你当前的位置进行查找可以嘛？\
-或者你直接打你所在的地址，也可以发送你当前位置。']
-answers_query_restaurants_unknownLocation = ['请问是%s嘛？', '对不起，我不知道这个是哪里。你能再说一遍么？']
-answers_query_restaurants_withoutTaste = ['好的，没问题，交给我来！\n那你能告诉我你的位置么？这\
-样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。（可以在公众号设置内允许我访问你的当前位置，这样以后就不用你输入地址啦！）', '好的，没问题，交给我来！\n那我使用你当前的位置进行查找可以嘛？\
-或者你直接打你所在的地址，也可以发送你当前位置。']
+样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。（可以在公众号设置内允许我访问你的当前位置，这样以后就不用你输入地址啦！）',
+'%s是个很棒的选择哦。\n好的宝贝~我y\已经检测到你当前的地址啦O(∩_∩)O~，可以直接使用它进行查找嘛？或者你也可以输入其他地址哦！']
+
+answers_query_restaurants_unknownLocation = ['请问是%s嘛？~', '对不起，我不知道这个是哪里。你能再说一遍么？']
+
+answers_query_restaurants_withoutTaste = ['好的哟～我有搜索到您附近好评最高的餐厅。\n那你能告诉我你的位置么？这\
+样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。（可以在公众号设置内允许我访问你的当前位置，这样以后就不用你输入地址啦！）',
+'好的哟～我有搜索到您附近好评最高的餐厅。\n好的宝贝~我y\已经检测到你当前的地址啦O(∩_∩)O~，可以直接使用它进行查找嘛？或者你也可以输入其他地址哦！']
+
 answers_query_taste = ['你是想让我给你推荐%s嘛？', '你是想吃%s嘛？']
+
 answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。它的招牌菜是%s。\n您距离它有%skm。\n你喜欢嘛?', 
 '对不起啊，我找不到更近的餐馆了。最近的就是这家叫%s（%s）的。它的招牌菜是%s。您距离它有%skm。\n你喜欢嘛？']
-answers_query_restaurants_show = ['我觉得这家叫%s（%s）的感觉不错。它的招牌菜是%s。\n您距离它有%skm。\n你喜欢嘛?']
-answers_query_restaurants_moreInformation = ["他们家的地址是%s。\n人均大概在$%s左右。"]
-answers_query_restaurants_next = [answers_query_restaurants_show[0], "我没有更多的啦，只能从头再开始一遍咯！\n" + answers_query_restaurants_show[0]]
+
+answers_query_restaurants_show = ['我觉得%s（%s）很好哦。招牌菜是%s。\n距离您现在的位置有%skm。\n不知道您对这家可还中意呀?']
+
+answers_query_restaurants_moreInformation = ["哈哈~您喜欢就太棒啦！这家餐厅的地址是%s。\nBTW, 悄悄说一句，这家餐厅人均消费是$%s左右～\n那我这次的推荐就结束啦~温馨小提示，记得照顾好同行的小伙伴，酒后不要开车。祝您出行安全、用餐愉快哦O(∩_∩)O"]
+
+answers_query_restaurants_next = ['好嘞！我马上给您换另一家！\n' + answers_query_restaurants_show[0], "我找不到更多的餐厅啦，只能从头再开始一遍咯！\n" + answers_query_restaurants_show[0]]
 
 class Mysql(object):
 
@@ -458,11 +467,11 @@ def makeResponse2(req):
 		#print '123'
 
 	if action == 'delete.unknownLocation':
-		speech = "好吧，那是哪里呀？"
+		speech = "Whoops~尴尬了~小客服学艺不精马上去面壁思过！宝宝能再告诉我一下你的详细地址吗？"
 		res["contextOut"] = deleteContext(result["contexts"], "user_asks4_restaurants_withunknownlocation")
 		context = findContext(result["contexts"], "user_asks4_restaurants_withtaste")
 		if context and context['lifespan'] <= 1:
-			speech = "哎呀，地址搞错好多次啦～我有点笨记不住那么多，所以被搞糊涂了。\n给我次机会，我们重头再来一次吧！如果地址老是不对你就给我发位置啦！"
+			speech = "呜呜呜……为什么搞错那么多次，小客服今天要挨骂了/(ㄒoㄒ)/\n我还在长大，请给我一点时间学习❤ 再给我一次机会重来好不好\(^o^)/\n如果地址还是不对，宝宝也可以发地址给我，我在线帮您定位哦(⊙o⊙)"
 			res["contextOut"] = clearContexts(result.get("contexts"))
 
 	if action == 'query.restaurants.location':
