@@ -268,9 +268,9 @@ def findContext(contexts, name):
 
 def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_address = ""):
 	contextOut = []
-	taste = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["taste"]
+	taste = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["taste"].encode('utf-8')
 	if taste == '': taste = '-1'
-	dish = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["dish"]
+	dish = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["dish"].encode('utf-8')
 	if dish == '': dish = '-1'
 	flavor = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["flavor"].encode('utf-8')
 	print "taste: %s, " % (str(taste)), "dish: %s, " % (str(dish)), "flavor: %s" % (str(flavor))
