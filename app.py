@@ -282,7 +282,7 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 		if taste == "all":
 			results = mysql.query("SELECT * FROM Restaurants", restaurant_schema)
 		else:
-			results = mysql.query("SELECT * FROM Restaurants WHERE type LIKE '%%%s%%' OR signature LIKE '%%%s%%'" % (taste, dish), restaurant_schema)
+			results = mysql.query("SELECT * FROM Restaurants WHERE type LIKE '%%%s%%' OR type LIKE '%%%s%%' OR signature LIKE '%%%s%%' OR signature LIKE '%%%s%%'" % (taste, dish, taste, dish), restaurant_schema)
 		mysql.close()
 		# print 'LatA' + str(LatA)
 		# print 'LngA' + str(LngA)
