@@ -420,7 +420,9 @@ def makeResponse2(req):
 			print restaurant
 			results = mysql.query("SELECT * FROM Restaurants WHERE name_en = '%s'" % (restaurant), restaurant_schema)
 			if len(results) >= 1:
-				speech = "你说的一定是" + results[0]['name_cn'] + "。它在" + results[0]['address'] + "。他们家的招牌菜是" + results[0]['signature'] + "。我说的对不对呀！"
+				speech = "你说的一定是%s（%s）。它在%s。他们家的招牌菜是%s。我说的对不对呀！" % (results[random.randint(0, len(results) - 1)]['name_cn'], 
+					results[random.randint(0, len(results) - 1)]['name_en'], results[random.randint(0, len(results) - 1)]['address'], 
+					results[random.randint(0, len(results) - 1)]['signature'])
 			else:
 				speech = "哎呀，我不知道这是哪家店哎！过几天再来问问看呢。"
 		else:
