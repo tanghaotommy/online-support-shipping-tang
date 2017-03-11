@@ -53,8 +53,8 @@ answers_query_restaurants_withoutTaste = ['好的哟～我有搜索到您附近�
 
 answers_query_taste = ['你是想让我给你推荐%s嘛？', '你是想吃%s嘛？']
 
-answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。它的招牌菜是%s。\n您距离它有%skm。\n你喜欢嘛?', 
-'对不起啊，我找不到更近的餐馆了。最近的就是这家叫%s（%s）的。它的招牌菜是%s。您距离它有%skm。\n你喜欢嘛？']
+answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。招牌菜是%s。\n您距离它有%skm。\n营业时间是%s哦！\n你喜欢嘛?', 
+'对不起啊，我找不到更近的餐馆了。最近的就是这家叫%s（%s）的。招牌菜是%s。您距离它有%skm。\n营业时间是%s哦！\n你喜欢嘛？[Rose][Rose][Rose]']
 
 answers_query_restaurants_show = ['我觉得%s（%s）很好哦。招牌菜是%s。\n距离您现在的位置有%skm。\n营业时间是%s哦！\n不知道您对这家可还中意呀?[Rose][Rose][Rose]']
 
@@ -357,7 +357,7 @@ def makeResponse2(req):
 			LngB = float(user_location["location"]["location"]["lng"])
 
 			_distance = distance(LatA, LngA, LatB, LngB)
-			speech = answers_query_restaurants_closer[0] % (item['name_cn'], item['name_en'], item['signature'], str(_distance))
+			speech = answers_query_restaurants_closer[0] % (item['name_cn'], item['name_en'], item['signature'], str(_distance), item['hour'])
 			
 			context["parameters"]["current"] = current
 			contextOut = [{"name": "restaurants_recommended", "parameters": context["parameters"], "lifespan": 3}]
@@ -381,7 +381,7 @@ def makeResponse2(req):
 			LngB = float(user_location["location"]["location"]["lng"])
 
 			_distance = distance(LatA, LngA, LatB, LngB)
-			speech = answers_query_restaurants_closer[1] % (item['name_cn'], item['name_en'], item['signature'], str(_distance))
+			speech = answers_query_restaurants_closer[1] % (item['name_cn'], item['name_en'], item['signature'], str(_distance), item['hour'])
 
 
 	if action == 'query.taste':
