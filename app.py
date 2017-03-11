@@ -319,7 +319,7 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 				# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
 				# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
 				speech = answers_query_restaurants_show[0] % (item['name_cn'], item['name_en'], item['signature'],
-					str(distance_map[sorted_key_list[0]], item['hour']))
+					str(distance_map[sorted_key_list[0]]), item['hour'])
 			else:
 				contextOut = clearContexts(contexts)
 				speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"
