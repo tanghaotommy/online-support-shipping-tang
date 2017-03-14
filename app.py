@@ -24,6 +24,7 @@ import logging
 import mysql.connector
 #from mysql.connector import errorcode
 
+MAXNUMBEROFRESTAURANTS = 100
 MAXDISTANCE = 300
 GOOGLEMAPS_API_KEY = "AIzaSyABcAARrYGpUs-9PCD1B7tdl3tMaxGHBZU"
 mysql_config = {
@@ -290,7 +291,9 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 		# print 'LngA' + str(LngA)
 		if len(results) > 0:
 			restaurants = {}
-			for row in results:
+			for i, row in enumerate(results):
+				if i >= 100:
+					break;
 				LatB = row['latitude']
 				LngB = row['longitude']
 				dist = distance(LatA, LngA, LatB, LngB)
@@ -299,7 +302,8 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 				if dist <= MAXDISTANCE:
 					restaurants[row['id']] = {"distance": dist, "rating": rating, "price_average": price_average, "overall": 1.0}
 
-			sorted_key_list = rank.rank(restaurants, method = "distance", reverse = False)
+			restaurants = rank.calculateOverallScore(restaurants)
+			sorted_key_list = rank.rank(restaurants, method = "overall", reverse = True)
 
 			if len(sorted_key_list) >= 1:
 				mysql.connect(mysql_config)
@@ -309,7 +313,9 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 				context = [{"name": "restaurants_recommended", "parameters": {
 				"lists": sorted_key_list,
 				"max": len(sorted_key_list), 
+				"batch_id": 1, 
 				"current": 0,
+				"total": len(results),
 				"user_location": {
 					"location.original": location_original,
 					"location": {
