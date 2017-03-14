@@ -319,7 +319,7 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 					"method": "distance",
 					"submethod": "",
 					"reverse": False,
-					"reverse_sub": False
+					"reverse_sub": False,
 					"restaurants": restaurants}},
 				"lifespan": 3}]
 				contextOut = clearContexts(contexts)
