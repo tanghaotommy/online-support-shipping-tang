@@ -292,8 +292,6 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 		if len(results) > 0:
 			restaurants = {}
 			for i, row in enumerate(results):
-				if i >= 100:
-					break;
 				LatB = row['latitude']
 				LngB = row['longitude']
 				dist = distance(LatA, LngA, LatB, LngB)
