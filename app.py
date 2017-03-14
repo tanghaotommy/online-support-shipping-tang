@@ -320,9 +320,9 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 						"formatted_address": formatted_address,
 						"location": {"lat": LatA, "lng": LngA}}},
 				"data": {
-					"method": "distance",
+					"method": "overall",
 					"submethod": "",
-					"reverse": False,
+					"reverse": True,
 					"reverse_sub": False,
 					"restaurants": restaurants}},
 				"lifespan": 3}]
