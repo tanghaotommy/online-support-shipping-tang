@@ -17,6 +17,8 @@ import random
 from flask import Flask
 from flask import request
 from flask import make_response
+import config
+import rank
 
 import logging
 import mysql.connector
@@ -24,7 +26,7 @@ import mysql.connector
 
 MAXDISTANCE = 300
 GOOGLEMAPS_API_KEY = "AIzaSyABcAARrYGpUs-9PCD1B7tdl3tMaxGHBZU"
-mysql_config = config = {
+mysql_config = {
   'user': 'root',
   'password': 'password',
   'host': 'newdatabase.cii5tvbuf3ji.us-west-1.rds.amazonaws.com',
@@ -287,15 +289,17 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 		# print 'LatA' + str(LatA)
 		# print 'LngA' + str(LngA)
 		if len(results) > 0:
-			distance_map = {}
+			restaurants = {}
 			for row in results:
 				LatB = row['latitude']
 				LngB = row['longitude']
 				dist = distance(LatA, LngA, LatB, LngB)
+				rating = row['rating']
+				price_average = row['price_average']
 				if dist <= MAXDISTANCE:
-					distance_map[row['id']] = dist
+					restaurants[row['id']] = {"distance": dist, "rating": rating, "price_average": price_average, "overall": 1.0}
 
-			sorted_key_list = sorted(distance_map, key=distance_map.get)
+			sorted_key_list = rank.rank(restaurants, method = "distance", reverse = False)
 
 			if len(sorted_key_list) >= 1:
 				mysql.connect(mysql_config)
@@ -310,7 +314,13 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 					"location.original": location_original,
 					"location": {
 						"formatted_address": formatted_address,
-						"location": {"lat": LatA, "lng": LngA}}}},
+						"location": {"lat": LatA, "lng": LngA}}},
+				"data": {
+					"method": "distance",
+					"submethod": "",
+					"reverse": False,
+					"reverse_sub": False
+					"restaurants": restaurants}},
 				"lifespan": 3}]
 				contextOut = clearContexts(contexts)
 				contextOut.extend(context)
@@ -319,7 +329,7 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 				# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
 				# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
 				speech = answers_query_restaurants_show[0] % (item['name_cn'], item['name_en'], item['signature'],
-					str(distance_map[sorted_key_list[0]]), item['hour'])
+					str(restaurants[sorted_key_list[0]]['distance']), item['hour'])
 			else:
 				contextOut = clearContexts(contexts)
 				speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"
