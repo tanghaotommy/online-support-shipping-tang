@@ -61,7 +61,7 @@ answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。招
 
 answers_query_restaurants_show = ['我觉得%s（%s）很好哦。招牌菜是%s。\n距离您现在的位置有%skm。\n营业时间是%s哦！\n不知道您对这家可还中意呀?[Rose][Rose][Rose]']
 
-answers_query_restaurants_moreInformation = ["哈哈~您喜欢就太棒啦！这家餐厅的地址是%s。\nBTW, 悄悄说一句，这家餐厅人均消费是$%s左右～\n那我这次的推荐就结束啦~温馨小提示，记得照顾好同行的小伙伴，酒后不要开车。祝您出行安全、用餐愉快哦O(∩_∩)O[Chuckle][Chuckle][Chuckle]"]
+answers_query_restaurants_moreInformation = ["哈哈~您喜欢就太棒啦！这家餐厅的地址是%s。\n联系电话是%s\nBTW, 悄悄说一句，这家餐厅人均消费是$%s左右～\n那我这次的推荐就结束啦~温馨小提示，记得照顾好同行的小伙伴，酒后不要开车。祝您出行安全、用餐愉快哦O(∩_∩)O[Chuckle][Chuckle][Chuckle]"]
 
 answers_query_restaurants_next = ['好嘞！我马上给您换另一家！\n' + answers_query_restaurants_show[0], "我找不到更多的餐厅啦，只能从头再开始一遍咯！\n" + answers_query_restaurants_show[0]]
 
@@ -596,7 +596,7 @@ def makeResponse2(req):
 		"lifespan": 3}]
 		res["contextOut"].extend(contextOut)
 
-		speech = answers_query_restaurants_moreInformation[0] % (item["address"], item["price_average"])
+		speech = answers_query_restaurants_moreInformation[0] % (item["address"], item["phone"], item["price_average"])
 		#speech = result.get('resolvedQuery')
 
 	if action == 'query.restaurants.withoutTaste':
