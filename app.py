@@ -435,9 +435,9 @@ def makeResponse2(req):
 			print restaurant
 			results = mysql.query("SELECT * FROM Restaurants WHERE name_en = '%s'" % (restaurant), restaurant_schema)
 			if len(results) >= 1:
-				speech = "你说的一定是%s（%s）。它在%s。他们家的招牌菜是%s。我说的对不对呀！" % (results[random.randint(0, len(results) - 1)]['name_cn'], 
-					results[random.randint(0, len(results) - 1)]['name_en'], results[random.randint(0, len(results) - 1)]['address'], 
-					results[random.randint(0, len(results) - 1)]['signature'])
+				item = results[random.randint(0, len(results) - 1)]
+				href = "<a href='http://maps.apple.com/?q=%s,%s'>%s</a>" % (item["latitude"], item["longitude"], item["address"])
+				speech = "你说的一定是%s（%s）。它在%s。他们家的招牌菜是%s。我说的对不对呀！" % (item['name_cn'], item['name_en'], href, item['signature'])
 			else:
 				speech = "哎呀，我不知道这是哪家店哎！过几天再来问问看呢。"
 		else:
