@@ -596,7 +596,8 @@ def makeResponse2(req):
 		"lifespan": 3}]
 		res["contextOut"].extend(contextOut)
 
-		speech = answers_query_restaurants_moreInformation[0] % (item["address"], item["phone"], item["price_average"])
+		href = "<a href='http://maps.apple.com/?q=%s,%s'>%s</a>" % (item["latitude"], item["longitude"], item["address"])
+		speech = answers_query_restaurants_moreInformation[0] % (href, item["phone"], item["price_average"])
 		#speech = result.get('resolvedQuery')
 
 	if action == 'query.restaurants.withoutTaste':
@@ -629,7 +630,7 @@ def makeResponse2(req):
 		}
 		speech = '<a href="http://54.183.198.179/UploadedFaceImages/1483855032.jpg">店面信息</a>'
 		#res["data"] = wechat
-                speech = "<a href='http://maps.google.com/maps?&z=10&q=34.0800231+-118.1026794'>a place</a>"
+		speech = "<a href='http://maps.google.com/maps/?q=34.0800231,-118.1026794'>a place</a>"
 
 	print("Response: " + str(speech))
 	res["speech"] = speech
