@@ -56,10 +56,10 @@ answers_query_restaurants_withoutTaste = ['好的哟～我有搜索到您附近�
 
 answers_query_taste = ['你是想让我给你推荐%s嘛？', '你是想吃%s嘛？']
 
-answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。招牌菜是%s。\n您距离它有%skm。\n营业时间是%s哦！\n你喜欢嘛?', 
-'对不起啊，我找不到更近的餐馆了。最近的就是这家叫%s（%s）的。招牌菜是%s。您距离它有%skm。\n营业时间是%s哦！\n你喜欢嘛？[Rose][Rose][Rose]']
+answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。招牌菜是%s。\n您距离它有%skm（如果没有使用当前位置，就是到你输入地址的距离哦！）。\n营业时间是%s哦！\n你喜欢嘛?', 
+'对不起啊，我找不到更近的餐馆了。最近的就是这家叫%s（%s）的。招牌菜是%s。您距离它有%skm（如果没有使用当前位置，就是到你输入地址的距离哦！）。\n营业时间是%s哦！\n你喜欢嘛？[Rose][Rose][Rose]']
 
-answers_query_restaurants_show = ['我觉得%s（%s）很好哦。招牌菜是%s。\n距离您现在的位置有%skm。\n营业时间是%s哦！\n不知道您对这家可还中意呀?[Rose][Rose][Rose]']
+answers_query_restaurants_show = ['我觉得%s（%s）很好哦。招牌菜是%s。\n距离您现在的位置有%skm（如果没有使用当前位置，就是到你输入地址的距离哦！）。\n营业时间是%s哦！\n不知道您对这家可还中意呀?[Rose][Rose][Rose]']
 
 answers_query_restaurants_moreInformation = ["哈哈~您喜欢就太棒啦！这家餐厅的地址是%s。\n联系电话是%s\nBTW, 悄悄说一句，这家餐厅人均消费是$%s左右～\n那我这次的推荐就结束啦~温馨小提示，记得照顾好同行的小伙伴，酒后不要开车。祝您出行安全、用餐愉快哦O(∩_∩)O[Chuckle][Chuckle][Chuckle]"]
 
