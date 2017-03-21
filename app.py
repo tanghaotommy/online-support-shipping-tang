@@ -244,6 +244,18 @@ def googleGeocode(req):
 	res["source"] = "shokse-restaurants-recommendation"
 	return res
 
+def addToLog(user_id, data, action = "history"):
+	if action = "history":
+		client = MongoClient()
+		db = client.wechat
+		db.UserLocation.insert_one({"user_id": user_id, "timestamp": time.time(), 
+			"location": {"latitude": data["user_location"]["location"]["location"]["lat"], "longitude": data["user_location"]["location"]["location"]["lng"]}, 
+			"taste": data["taste"], "dish": data["dish"], "flavor": data["flavor"],
+			"total_recommendation": data["total"], "which": data["current"], "sorting_method": data["restaurants"]["method"], "restaurant_id": data["lists"][data["current"]]
+			})
+		print "Added user's confirmation: %s!" % (user_id)
+		db.close()
+
 def clearContexts(contexts):
 	for context in contexts:
 		context["lifespan"] = 0
@@ -271,11 +283,12 @@ def findContext(contexts, name):
 
 def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_address = ""):
 	contextOut = []
-	taste = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["taste"].encode('utf-8')
+	parameters = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]
+	taste = parameters["taste"].encode('utf-8')
 	if taste == '': taste = '-1'
-	dish = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["dish"].encode('utf-8')
+	dish = parameters["dish"].encode('utf-8')
 	if dish == '': dish = '-1'
-	flavor = findContext(contexts, "user_asks4_restaurants_withtaste")["parameters"]["flavor"].encode('utf-8')
+	flavor = parameters["flavor"].encode('utf-8')
 	print "taste: %s, " % (str(taste)), "dish: %s, " % (str(dish)), "flavor: %s" % (str(flavor))
 	#print flavor_taste
 	if flavor_taste.has_key(flavor):
@@ -309,6 +322,9 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 				mysql.close()
 
 				context = [{"name": "restaurants_recommended", "parameters": {
+				"taste": parameters["taste"].encode('utf-8'),
+				"dish": parameters["dish"].encode('utf-8'),
+				"flavor": parameters["flavor"].encode('utf-8'),
 				"lists": sorted_key_list,
 				"max": len(sorted_key_list), 
 				"batch_id": 1, 
@@ -589,6 +605,8 @@ def makeResponse2(req):
 		mysql.connect(mysql_config)
 		item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
 		mysql.close()
+
+		addToLog(user_id, context["parameters"], action = "history")
 
 		res["contextOut"] = clearContexts(result.get("contexts"))
 		contextOut = [{"name": "restaurants_recommended_accepted", "parameters": {
