@@ -245,16 +245,16 @@ def googleGeocode(req):
 	return res
 
 def addToLog(user_id, data, action = "history"):
-	if action = "history":
+	if action == "history":
 		client = MongoClient()
 		db = client.wechat
-		db.UserLocation.insert_one({"user_id": user_id, "timestamp": time.time(), 
+		db.UserConfirmedHistory.insert_one({"user_id": user_id, "timestamp": time.time(), 
 			"location": {"latitude": data["user_location"]["location"]["location"]["lat"], "longitude": data["user_location"]["location"]["location"]["lng"]}, 
 			"taste": data["taste"], "dish": data["dish"], "flavor": data["flavor"],
-			"total_recommendation": data["total"], "which": data["current"], "sorting_method": data["restaurants"]["method"], "restaurant_id": data["lists"][data["current"]]
+			"total_recommendation": data["total"], "which": data["current"], "sorting_method": data["data"]["method"], "restaurant_id": data["lists"][data["current"]]
 			})
 		print "Added user's confirmation: %s!" % (user_id)
-		db.close()
+                client.close()
 
 def clearContexts(contexts):
 	for context in contexts:
