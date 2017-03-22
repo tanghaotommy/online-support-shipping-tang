@@ -35,6 +35,7 @@ mysql_config = {
 }
 restaurant_schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
 'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
+waitingtime_schema = ["restaurant_id", "waiting_time"]
 flavor_taste = {
 	'辣的': '川菜',
 	'甜的': '上海菜'
@@ -321,6 +322,14 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 				item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (sorted_key_list[0]), restaurant_schema)[0]
 				mysql.close()
 
+				user_location = {
+					"location.original": location_original,
+					"location": {
+						"formatted_address": formatted_address,
+						"location": {"lat": LatA, "lng": LngA}
+						}
+					}
+
 				context = [{"name": "restaurants_recommended", "parameters": {
 				"taste": parameters["taste"].encode('utf-8'),
 				"dish": parameters["dish"].encode('utf-8'),
@@ -330,11 +339,7 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 				"batch_id": 1, 
 				"current": 0,
 				"total": len(results),
-				"user_location": {
-					"location.original": location_original,
-					"location": {
-						"formatted_address": formatted_address,
-						"location": {"lat": LatA, "lng": LngA}}},
+				"user_location": user_location,
 				"data": {
 					"method": "overall",
 					"submethod": "",
@@ -352,8 +357,9 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 				# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
 				# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
 				# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
-				speech = answers_query_restaurants_show[0] % (item['name_cn'], item['name_en'], item['signature'],
-					addr, str(restaurants[sorted_key_list[0]]['distance']), item['hour'])
+				speech = generateRecommendationAnswer(sorted_key_list[0], user_location, answers_query_restaurants_show[0])
+				# speech = answers_query_restaurants_show[0] % (item['name_cn'], item['name_en'], item['signature'],
+				# 	addr, str(restaurants[sorted_key_list[0]]['distance']), item['hour'])
 			else:
 				contextOut = clearContexts(contexts)
 				speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"
@@ -363,6 +369,26 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 	else:
 		speech = '哎呀！数据库出了点小问题！等我下！'
 	return speech, contextOut
+
+def generateRecommendationAnswer(restaurant_id, user_location, template):
+	formatted_address = user_location["location"]["formatted_address"]
+	if formatted_address != "": 
+		addr = "（%s）" % (formatted_address)
+	else:
+		addr = ""
+	mysql = Mysql()
+	mysql.connect(mysql_config)
+	item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (restaurant_id), restaurant_schema)[0]
+	mysql.close()
+
+	LatA = item["latitude"]
+	LngA = item["longitude"]
+	LatB = float(user_location["location"]["location"]["lat"])
+	LngB = float(user_location["location"]["location"]["lng"])
+
+	_distance = distance(LatA, LngA, LatB, LngB)
+	speech = template % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
+	return speech
 
 def makeResponse2(req):
 	action = req.get("result").get("action")
@@ -385,19 +411,20 @@ def makeResponse2(req):
 			addr = ""
 		if current > 0:
 			current -= 1
-			mysql = Mysql()
-			mysql.connect(mysql_config)
-			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
-			mysql.close()
+			# mysql = Mysql()
+			# mysql.connect(mysql_config)
+			# item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
+			# mysql.close()
 
-			LatA = item["latitude"]
-			LngA = item["longitude"]
-			LatB = float(user_location["location"]["location"]["lat"])
-			LngB = float(user_location["location"]["location"]["lng"])
+			# LatA = item["latitude"]
+			# LngA = item["longitude"]
+			# LatB = float(user_location["location"]["location"]["lat"])
+			# LngB = float(user_location["location"]["location"]["lng"])
 
-			_distance = distance(LatA, LngA, LatB, LngB)
-			speech = answers_query_restaurants_closer[0] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
+			# _distance = distance(LatA, LngA, LatB, LngB)
+			# speech = answers_query_restaurants_closer[0] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
 			
+			speech = generateRecommendationAnswer(lists[current], user_location, answers_query_restaurants_closer[0])
 			context["parameters"]["current"] = current
 			contextOut = [{"name": "restaurants_recommended", "parameters": context["parameters"], "lifespan": 3}]
 			res["contextOut"] = clearContexts(result.get("contexts"))
@@ -409,10 +436,10 @@ def makeResponse2(req):
 			res["contextOut"] = clearContexts(result.get("contexts"))
 			res["contextOut"].extend(contextOut)
 
-			mysql = Mysql()
-			mysql.connect(mysql_config)
-			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
-			mysql.close()
+			# mysql = Mysql()
+			# mysql.connect(mysql_config)
+			# item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
+			# mysql.close()
 
 			LatA = item["latitude"]
 			LngA = item["longitude"]
@@ -420,7 +447,8 @@ def makeResponse2(req):
 			LngB = float(user_location["location"]["location"]["lng"])
 
 			_distance = distance(LatA, LngA, LatB, LngB)
-			speech = answers_query_restaurants_closer[1] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
+			speech = generateRecommendationAnswer(lists[current], user_location, answers_query_restaurants_closer[1])
+			# speech = answers_query_restaurants_closer[1] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
 
 
 	if action == 'query.taste':
@@ -576,18 +604,19 @@ def makeResponse2(req):
 			addr = ""
 
 		if current < context["parameters"]["max"] - 1:
-			mysql = Mysql()
-			mysql.connect(mysql_config)
-			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
-			mysql.close()
+			# mysql = Mysql()
+			# mysql.connect(mysql_config)
+			# item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
+			# mysql.close()
 
-			LatA = item["latitude"]
-			LngA = item["longitude"]
-			LatB = float(user_location["location"]["location"]["lat"])
-			LngB = float(user_location["location"]["location"]["lng"])
+			# LatA = item["latitude"]
+			# LngA = item["longitude"]
+			# LatB = float(user_location["location"]["location"]["lat"])
+			# LngB = float(user_location["location"]["location"]["lng"])
 
-			_distance = distance(LatA, LngA, LatB, LngB)
-			speech = answers_query_restaurants_next[0] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
+			# _distance = distance(LatA, LngA, LatB, LngB)
+			# speech = answers_query_restaurants_next[0] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
+			speech = generateRecommendationAnswer(lists[current], user_location, answers_query_restaurants_next[0])
 			context["parameters"]["current"] = current
 			contextOut = [{"name": "restaurants_recommended", "parameters": context["parameters"], "lifespan": 3}]
 			res["contextOut"] = clearContexts(result.get("contexts"))
@@ -599,18 +628,19 @@ def makeResponse2(req):
 			res["contextOut"] = clearContexts(result.get("contexts"))
 			res["contextOut"].extend(contextOut)
 
-			mysql = Mysql()
-			mysql.connect(mysql_config)
-			item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
-			mysql.close()
+			# mysql = Mysql()
+			# mysql.connect(mysql_config)
+			# item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
+			# mysql.close()
 
-			LatA = item["latitude"]
-			LngA = item["longitude"]
-			LatB = float(user_location["location"]["location"]["lat"])
-			LngB = float(user_location["location"]["location"]["lng"])
+			# LatA = item["latitude"]
+			# LngA = item["longitude"]
+			# LatB = float(user_location["location"]["location"]["lat"])
+			# LngB = float(user_location["location"]["location"]["lng"])
 
-			_distance = distance(LatA, LngA, LatB, LngB)
-			speech = answers_query_restaurants_next[1] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])	
+			# _distance = distance(LatA, LngA, LatB, LngB)
+			speech = generateRecommendationAnswer(lists[current], user_location, answers_query_restaurants_next[1])
+			# speech = answers_query_restaurants_next[1] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])	
 
 	if action == 'query.restaurants.moreInformation':
 		context = findContext(result["contexts"], "restaurants_recommended")
