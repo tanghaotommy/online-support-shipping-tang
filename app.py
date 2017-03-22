@@ -56,10 +56,10 @@ answers_query_restaurants_withoutTaste = ['好的哟～我有搜索到您附近�
 
 answers_query_taste = ['你是想让我给你推荐%s嘛？', '你是想吃%s嘛？']
 
-answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。招牌菜是%s。\n您距离它有%skm（如果没有使用当前位置，就是到你输入地址的距离哦！）。\n营业时间是%s哦！\n你喜欢嘛?', 
-'对不起啊，我找不到更近的餐馆了。最近的就是这家叫%s（%s）的。招牌菜是%s。您距离它有%skm（如果没有使用当前位置，就是到你输入地址的距离哦！）。\n营业时间是%s哦！\n你喜欢嘛？[Rose][Rose][Rose]']
+answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。招牌菜是%s。\n距离您现在的位置%s有%skm。\n营业时间是%s哦！\n你喜欢嘛?', 
+'对不起啊，我找不到更近的餐馆了。最近的就是这家叫%s（%s）的。招牌菜是%s。\n距离您现在的位置%s有%skm。\n营业时间是%s哦！\n你喜欢嘛？[Rose][Rose][Rose]']
 
-answers_query_restaurants_show = ['我觉得%s（%s）很好哦。招牌菜是%s。\n距离您现在的位置有%skm（如果没有使用当前位置，就是到你输入地址的距离哦！）。\n营业时间是%s哦！\n不知道您对这家可还中意呀?[Rose][Rose][Rose]']
+answers_query_restaurants_show = ['我觉得%s（%s）很好哦。招牌菜是%s。\n距离您现在的位置%s有%skm。\n营业时间是%s哦！\n不知道您对这家可还中意呀?[Rose][Rose][Rose]']
 
 answers_query_restaurants_moreInformation = ["哈哈~您喜欢就太棒啦！这家餐厅的地址是%s。\n联系电话是%s\nBTW, 悄悄说一句，这家餐厅人均消费是$%s左右～\n那我这次的推荐就结束啦~温馨小提示，记得照顾好同行的小伙伴，酒后不要开车。祝您出行安全、用餐愉快哦O(∩_∩)O[Chuckle][Chuckle][Chuckle]"]
 
@@ -344,12 +344,16 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 				"lifespan": 3}]
 				contextOut = clearContexts(contexts)
 				contextOut.extend(context)
+				if formatted_address != "": 
+					addr = "（%s）" % (formatted_address)
+				else: 
+					addr = ""
 				# print sorted_key_list[0]
 				# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
 				# print 'LngB' + str(results[sorted_key_list[0]]['longitude'])
 				# print str(distance(LatA, LngA, results[sorted_key_list[0]-1]['latitude'], results[sorted_key_list[0]]['longitude']))
 				speech = answers_query_restaurants_show[0] % (item['name_cn'], item['name_en'], item['signature'],
-					str(restaurants[sorted_key_list[0]]['distance']), item['hour'])
+					addr, str(restaurants[sorted_key_list[0]]['distance']), item['hour'])
 			else:
 				contextOut = clearContexts(contexts)
 				speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"
@@ -374,6 +378,11 @@ def makeResponse2(req):
 		lists = context["parameters"]["lists"]
 		current = context["parameters"]["current"]
 		user_location = context["parameters"]["user_location"]
+		formatted_address = user_location["location"]["formatted_address"]
+		if formatted_address != "": 
+			addr = "（%s）" % (formatted_address)
+		else:
+			addr = ""
 		if current > 0:
 			current -= 1
 			mysql = Mysql()
@@ -387,7 +396,7 @@ def makeResponse2(req):
 			LngB = float(user_location["location"]["location"]["lng"])
 
 			_distance = distance(LatA, LngA, LatB, LngB)
-			speech = answers_query_restaurants_closer[0] % (item['name_cn'], item['name_en'], item['signature'], str(_distance), item['hour'])
+			speech = answers_query_restaurants_closer[0] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
 			
 			context["parameters"]["current"] = current
 			contextOut = [{"name": "restaurants_recommended", "parameters": context["parameters"], "lifespan": 3}]
@@ -411,7 +420,7 @@ def makeResponse2(req):
 			LngB = float(user_location["location"]["location"]["lng"])
 
 			_distance = distance(LatA, LngA, LatB, LngB)
-			speech = answers_query_restaurants_closer[1] % (item['name_cn'], item['name_en'], item['signature'], str(_distance), item['hour'])
+			speech = answers_query_restaurants_closer[1] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
 
 
 	if action == 'query.taste':
@@ -560,6 +569,12 @@ def makeResponse2(req):
 		lists = context["parameters"]["lists"]
 		current = context["parameters"]["current"] + 1
 		user_location = context["parameters"]["user_location"]
+		formatted_address = user_location["location"]["formatted_address"]
+		if formatted_address != "": 
+			addr = "（%s）" % (formatted_address)
+		else:
+			addr = ""
+
 		if current < context["parameters"]["max"] - 1:
 			mysql = Mysql()
 			mysql.connect(mysql_config)
@@ -572,7 +587,7 @@ def makeResponse2(req):
 			LngB = float(user_location["location"]["location"]["lng"])
 
 			_distance = distance(LatA, LngA, LatB, LngB)
-			speech = answers_query_restaurants_next[0] % (item['name_cn'], item['name_en'], item['signature'], str(_distance), item['hour'])
+			speech = answers_query_restaurants_next[0] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
 			context["parameters"]["current"] = current
 			contextOut = [{"name": "restaurants_recommended", "parameters": context["parameters"], "lifespan": 3}]
 			res["contextOut"] = clearContexts(result.get("contexts"))
@@ -595,7 +610,7 @@ def makeResponse2(req):
 			LngB = float(user_location["location"]["location"]["lng"])
 
 			_distance = distance(LatA, LngA, LatB, LngB)
-			speech = answers_query_restaurants_next[1] % (item['name_cn'], item['name_en'], item['signature'], str(_distance), item['hour'])	
+			speech = answers_query_restaurants_next[1] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])	
 
 	if action == 'query.restaurants.moreInformation':
 		context = findContext(result["contexts"], "restaurants_recommended")
