@@ -57,14 +57,16 @@ answers_query_restaurants_withoutTaste = ['好的哟～我有搜索到您附近�
 
 answers_query_taste = ['你是想让我给你推荐%s嘛？', '你是想吃%s嘛？']
 
-answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。招牌菜是%s。\n距离您现在的位置%s有%skm。\n营业时间是%s哦！\n你喜欢嘛?', 
-'对不起啊，我找不到更近的餐馆了。最近的就是这家叫%s（%s）的。招牌菜是%s。\n距离您现在的位置%s有%skm。\n营业时间是%s哦！\n你喜欢嘛？[Rose][Rose][Rose]']
+answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。招牌菜是%s。\n距离您现在的位置%s有%skm。%s\n营业时间是%s哦！\n你喜欢嘛?', 
+'对不起啊，我找不到更近的餐馆了。最近的就是这家叫%s（%s）的。招牌菜是%s。\n距离您现在的位置%s有%skm。%s\n营业时间是%s哦！\n你喜欢嘛？[Rose][Rose][Rose]']
 
-answers_query_restaurants_show = ['我觉得%s（%s）很好哦。招牌菜是%s。\n距离您现在的位置%s有%skm。\n营业时间是%s哦！\n不知道您对这家可还中意呀?[Rose][Rose][Rose]']
+answers_query_restaurants_show = ['我觉得%s（%s）很好哦。招牌菜是%s。\n距离您现在的位置%s有%skm。%s\n营业时间是%s哦！\n不知道您对这家可还中意呀?[Rose][Rose][Rose]']
 
 answers_query_restaurants_moreInformation = ["哈哈~您喜欢就太棒啦！这家餐厅的地址是%s。\n联系电话是%s\nBTW, 悄悄说一句，这家餐厅人均消费是$%s左右～\n那我这次的推荐就结束啦~温馨小提示，记得照顾好同行的小伙伴，酒后不要开车。祝您出行安全、用餐愉快哦O(∩_∩)O[Chuckle][Chuckle][Chuckle]"]
 
 answers_query_restaurants_next = ['好嘞！我马上给您换另一家！\n' + answers_query_restaurants_show[0], "我找不到更多的餐厅啦，只能从头再开始一遍咯！\n" + answers_query_restaurants_show[0]]
+
+piece_answer_waitingtime = ["\n目前预测的等待时间大概是%s分钟哦！"]
 
 class Mysql(object):
 
@@ -386,9 +388,24 @@ def generateRecommendationAnswer(restaurant_id, user_location, template):
 	LatB = float(user_location["location"]["location"]["lat"])
 	LngB = float(user_location["location"]["location"]["lng"])
 
+	waiting_time = getWaitingTime(restaurant_id)
+	if not waiting_time == None:
+		waiting_time = piece_answer_waitingtime % (str(waiting_time))
+	else:
+		waiting_time = ""
 	_distance = distance(LatA, LngA, LatB, LngB)
-	speech = template % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
+	speech = template % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), waiting_time, item['hour'])
 	return speech
+
+def getWaitingTime(restaurant_id):
+	mysql = Mysql()
+	mysql.connect(mysql_config)
+	items = mysql.query("SELECT * FROM WaitingTime WHERE id=%d" % (restaurant_id), waitingtime_schema)
+	mysql.close()
+	if not items:
+		return None
+	else: 
+		return items[0]["waiting_time"]
 
 def makeResponse2(req):
 	action = req.get("result").get("action")
