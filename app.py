@@ -390,7 +390,7 @@ def generateRecommendationAnswer(restaurant_id, user_location, template):
 
 	waiting_time = getWaitingTime(restaurant_id)
 	if not waiting_time == None:
-		waiting_time = piece_answer_waitingtime % (str(waiting_time))
+		waiting_time = piece_answer_waitingtime[0] % (str(waiting_time))
 	else:
 		waiting_time = ""
 	_distance = distance(LatA, LngA, LatB, LngB)
@@ -400,7 +400,7 @@ def generateRecommendationAnswer(restaurant_id, user_location, template):
 def getWaitingTime(restaurant_id):
 	mysql = Mysql()
 	mysql.connect(mysql_config)
-	items = mysql.query("SELECT * FROM WaitingTime WHERE id=%d" % (restaurant_id), waitingtime_schema)
+	items = mysql.query("SELECT * FROM WaitingTime WHERE restaurant_id=%d" % (restaurant_id), waitingtime_schema)
 	mysql.close()
 	if not items:
 		return None
@@ -458,12 +458,12 @@ def makeResponse2(req):
 			# item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
 			# mysql.close()
 
-			LatA = item["latitude"]
-			LngA = item["longitude"]
-			LatB = float(user_location["location"]["location"]["lat"])
-			LngB = float(user_location["location"]["location"]["lng"])
+			# LatA = item["latitude"]
+			# LngA = item["longitude"]
+			# LatB = float(user_location["location"]["location"]["lat"])
+			# LngB = float(user_location["location"]["location"]["lng"])
 
-			_distance = distance(LatA, LngA, LatB, LngB)
+			# _distance = distance(LatA, LngA, LatB, LngB)
 			speech = generateRecommendationAnswer(lists[current], user_location, answers_query_restaurants_closer[1])
 			# speech = answers_query_restaurants_closer[1] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
 
