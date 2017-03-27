@@ -505,9 +505,14 @@ def makeResponse2(req):
 			print restaurant
 			results = mysql.query("SELECT * FROM Restaurants WHERE name_en = '%s'" % (restaurant), restaurant_schema)
 			if len(results) >= 1:
-				item = results[random.randint(0, len(results) - 1)]
-				href = "<a href='http://maps.apple.com/?q=%s,%s'>%s</a>" % (item["latitude"], item["longitude"], item["address"])
-				speech = "你说的一定是%s（%s）。它在%s。他们家的招牌菜是%s。我说的对不对呀！" % (item['name_cn'], item['name_en'], href, item['signature'])
+				# item = results[random.randint(0, len(results) - 1)]
+				# href = "<a href='http://maps.apple.com/?q=%s,%s'>%s</a>" % (item["latitude"], item["longitude"], item["address"])
+				# speech = "你说的一定是%s（%s）。它在%s。他们家的招牌菜是%s。我说的对不对呀！" % (item['name_cn'], item['name_en'], href, item['signature'])
+				speech = "我找到一些叫%s（%s）的：\n" % (results[0]['name_cn'], results[0]['name_en'])
+				for item in results:
+					href = "<a href='http://maps.apple.com/?q=%s,%s'>%s</a>" % (item["latitude"], item["longitude"], item["address"])
+					speech += "这家在%s。他们家的招牌菜是%s。\n" % ( href, item['signature'])
+				speech += "我说的对不对呀？"
 			else:
 				speech = "哎呀，我不知道这是哪家店哎！过几天再来问问看呢。"
 		else:
