@@ -419,7 +419,7 @@ def makeResponse2(req):
 	if action == 'query.restaurants.closer':
 		context = findContext(result["contexts"], "restaurants_recommended")
 		lists = context["parameters"]["lists"]
-		current = context["parameters"]["current"]
+		current = int(context["parameters"]["current"])
 		user_location = context["parameters"]["user_location"]
 		formatted_address = user_location["location"]["formatted_address"]
 		if formatted_address != "": 
@@ -617,7 +617,7 @@ def makeResponse2(req):
 	if action == 'query.restaurants.next':
 		context = findContext(result["contexts"], "restaurants_recommended")
 		lists = context["parameters"]["lists"]
-		current = context["parameters"]["current"] + 1
+		current = int(context["parameters"]["current"]) + 1
 		user_location = context["parameters"]["user_location"]
 		formatted_address = user_location["location"]["formatted_address"]
 		if formatted_address != "": 
