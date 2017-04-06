@@ -254,7 +254,7 @@ def addToLog(user_id, data, action = "history"):
 		db.UserConfirmedHistory.insert_one({"user_id": user_id, "timestamp": time.time(), 
 			"location": {"latitude": data["user_location"]["location"]["location"]["lat"], "longitude": data["user_location"]["location"]["location"]["lng"]}, 
 			"taste": data["taste"], "dish": data["dish"], "flavor": data["flavor"],
-			"total_recommendation": data["total"], "which": data["current"], "sorting_method": data["data"]["method"], "restaurant_id": data["lists"][data["current"]]
+			"total_recommendation": data["total"], "which": data["current"], "sorting_method": data["data"]["method"], "restaurant_id": data["lists"][int(data["current"])]
 			})
 		print "Added user's confirmation: %s!" % (user_id)
                 client.close()
@@ -667,7 +667,7 @@ def makeResponse2(req):
 	if action == 'query.restaurants.moreInformation':
 		context = findContext(result["contexts"], "restaurants_recommended")
 		lists = context["parameters"]["lists"]
-		current = context["parameters"]["current"]
+		current = int(context["parameters"]["current"])
 		mysql = Mysql()
 		mysql.connect(mysql_config)
 		item = mysql.query("SELECT * FROM Restaurants WHERE id=%d" % (lists[current]), restaurant_schema)[0]
