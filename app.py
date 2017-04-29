@@ -53,7 +53,7 @@ answers_query_restaurants_unknownLocation = ['请问是%s嘛？~', '对不起，
 
 answers_query_restaurants_withoutTaste = ['好的哟～我有搜索到您附近好评最高的餐厅。\n那你能告诉我你的位置么？这\
 样我好帮你寻找符合条件的餐馆。你可以直接打你所在的地址，也可以发送你当前位置。（可以在公众号设置内允许我访问你的当前位置，这样以后就不用你输入地址啦！）',
-'好的哟～我有搜索到您附近好评最高的餐厅。\n好的宝贝~我已经检测到你当前的地址啦O(∩_∩)O~，可以直接使用它进行查找嘛？或者你也可以输入其他地址哦！']
+'好的哟～我有搜索到您附近好评最高的餐厅。\n好的宝贝~我已经检测到你当前的地址啦O(∩_∩)O~，可以直接使用它进行查找嘛？或者你也可以输入其他地址哦！\n1.回复"是"使用当前地址进行查找。\n2.或者直接输入其他地址（城市名、街道名）']
 
 answers_query_taste = ['你是想让我给你推荐%s嘛？', '你是想吃%s嘛？']
 
@@ -414,7 +414,8 @@ def makeResponse2(req):
 	parameters = result.get("parameters")
 	res = {}
 	print "Action: ", action
-	speech = '出错啦！！！'
+	print "Received Contexts: ", result["contexts"]
+        speech = '出错啦！！！'
 
 	if action == 'query.restaurants.closer':
 		context = findContext(result["contexts"], "restaurants_recommended")
@@ -686,6 +687,7 @@ def makeResponse2(req):
 		#speech = result.get('resolvedQuery')
 
 	if action == 'query.restaurants.withoutTaste':
+                print "Enter query.restaurants.withoutTaste"
 		client = MongoClient()
 		db = client.wechat
 		if db.UserLocation.find({"user_id": user_id}).count() >= 1:
@@ -718,7 +720,11 @@ def makeResponse2(req):
 		speech = "<a href='http://maps.google.com/maps/?q=34.0800231,-118.1026794'>a place</a>"
 
 	print("Response: " + str(speech))
-	res["speech"] = speech
+        if res.has_key("contextOut"):
+	    print("Respond contexts: " + str(res["contextOut"]))
+        else:
+            print("Respond without contexts!")
+        res["speech"] = speech
 	res["displayText"] = speech
 	res["source"] = "shokse-restaurants-recommendation"
 
