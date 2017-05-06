@@ -1,5 +1,12 @@
-#Webhook for Chatbot Server of SmartHome Project
+## app.py
+Contains main logic for receiving and responding to api.ai
+Python flask server framework
 
-This is the Api.ai webhook for SmartHome project.
+## config.py
+Contains general configuration of system parameters.
 
-<a href="https://heroku.com/deploy" target="_blank"><img src="https://www.herokucdn.com/deploy/button.svg"></a>
+## start.sh
+For starting the server, logs will be stored in log/, error information will be stored in error
+
+## stop.sh
+For stoping the server
