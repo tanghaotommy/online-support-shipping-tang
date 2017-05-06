@@ -22,7 +22,7 @@ import rank
 
 import logging
 import mysql.connector
-#from mysql.connector import errorcode
+from mysql.connector import errorcode
 
 MAXNUMBEROFRESTAURANTS = 100
 MAXDISTANCE = 300
@@ -33,9 +33,10 @@ mysql_config = {
   'host': 'newdatabase.cii5tvbuf3ji.us-west-1.rds.amazonaws.com',
   'database': 'RestaurantsRecommendation'
 }
-restaurant_schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone', 
+restaurant_schema = ['id', 'name_en', 'name_cn', 'rating', 'type', 'signature', 'price_average', 'address', 'phone',
 'hour', 'city', 'state', 'zip', 'website', 'latitude', 'longitude']
 waitingtime_schema = ["restaurant_id", "waiting_time"]
+discount_info_schema = ["id", "restaurant_id", "discount_content", "gmt_start", "gmt_end"]
 flavor_taste = {
 	'辣的': '川菜',
 	'甜的': '上海菜'
@@ -57,7 +58,7 @@ answers_query_restaurants_withoutTaste = ['好的哟～我有搜索到您附近�
 
 answers_query_taste = ['你是想让我给你推荐%s嘛？', '你是想吃%s嘛？']
 
-answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。招牌菜是%s。\n距离您现在的位置%s有%skm。%s\n营业时间是%s哦！\n你喜欢嘛?', 
+answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。招牌菜是%s。\n距离您现在的位置%s有%skm。%s\n营业时间是%s哦！\n你喜欢嘛?',
 '对不起啊，我找不到更近的餐馆了。最近的就是这家叫%s（%s）的。招牌菜是%s。\n距离您现在的位置%s有%skm。%s\n营业时间是%s哦！\n你喜欢嘛？[Rose][Rose][Rose]']
 
 answers_query_restaurants_show = ['我觉得%s（%s）很好哦。招牌菜是%s。\n距离您现在的位置%s有%skm。%s\n营业时间是%s哦！\n不知道您对这家可还中意呀?[Rose][Rose][Rose]']
@@ -120,6 +121,10 @@ class Mysql(object):
 # Flask app should start in global layout
 app = Flask(__name__)
 
+@app.route('/')
+def index():
+	return "aitar ok"
+
 @app.route('/user_location', methods=['POST'])
 def user_location():
 	req = request.get_json(silent=True, force=True)
@@ -144,7 +149,7 @@ def user_location():
 	# print user_location
 
 	res = json.dumps(res, indent=4)
-	print "Response: ", res 
+	print "Response: ", res
 	r = make_response(res)
 	r.headers['Content-Type'] = 'application/json'
 	return r
@@ -181,7 +186,7 @@ def smarthome():
 
 @app.route('/check_location', methods=['POST'])
 def check_location():
-   
+
     req = request.get_json(silent=True, force=True)
     print("Request received from WeChat in check_location.")
     print(json.dumps(req, indent=4))
@@ -251,8 +256,8 @@ def addToLog(user_id, data, action = "history"):
 	if action == "history":
 		client = MongoClient()
 		db = client.wechat
-		db.UserConfirmedHistory.insert_one({"user_id": user_id, "timestamp": time.time(), 
-			"location": {"latitude": data["user_location"]["location"]["location"]["lat"], "longitude": data["user_location"]["location"]["location"]["lng"]}, 
+		db.UserConfirmedHistory.insert_one({"user_id": user_id, "timestamp": time.time(),
+			"location": {"latitude": data["user_location"]["location"]["location"]["lat"], "longitude": data["user_location"]["location"]["location"]["lng"]},
 			"taste": data["taste"], "dish": data["dish"], "flavor": data["flavor"],
 			"total_recommendation": data["total"], "which": data["current"], "sorting_method": data["data"]["method"], "restaurant_id": data["lists"][int(data["current"])]
 			})
@@ -337,8 +342,8 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 				"dish": parameters["dish"].encode('utf-8'),
 				"flavor": parameters["flavor"].encode('utf-8'),
 				"lists": sorted_key_list,
-				"max": len(sorted_key_list), 
-				"batch_id": 1, 
+				"max": len(sorted_key_list),
+				"batch_id": 1,
 				"current": 0,
 				"total": len(results),
 				"user_location": user_location,
@@ -351,9 +356,9 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 				"lifespan": 3}]
 				contextOut = clearContexts(contexts)
 				contextOut.extend(context)
-				if formatted_address != "": 
+				if formatted_address != "":
 					addr = "（%s）" % (formatted_address)
-				else: 
+				else:
 					addr = ""
 				# print sorted_key_list[0]
 				# print 'LatB' + str(results[sorted_key_list[0]]['latitude'])
@@ -374,7 +379,7 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 
 def generateRecommendationAnswer(restaurant_id, user_location, template):
 	formatted_address = user_location["location"]["formatted_address"]
-	if formatted_address != "": 
+	if formatted_address != "":
 		addr = "（%s）" % (formatted_address)
 	else:
 		addr = ""
@@ -404,7 +409,7 @@ def getWaitingTime(restaurant_id):
 	mysql.close()
 	if not items:
 		return None
-	else: 
+	else:
 		return items[0]["waiting_time"]
 
 def makeResponse2(req):
@@ -424,7 +429,7 @@ def makeResponse2(req):
 		current = int(context["parameters"]["current"])
 		user_location = context["parameters"]["user_location"]
 		formatted_address = user_location["location"]["formatted_address"]
-		if formatted_address != "": 
+		if formatted_address != "":
 			addr = "（%s）" % (formatted_address)
 		else:
 			addr = ""
@@ -442,7 +447,7 @@ def makeResponse2(req):
 
 			# _distance = distance(LatA, LngA, LatB, LngB)
 			# speech = answers_query_restaurants_closer[0] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
-			
+
 			speech = generateRecommendationAnswer(lists[current], user_location, answers_query_restaurants_closer[0])
 			context["parameters"]["current"] = current
 			contextOut = [{"name": "restaurants_recommended", "parameters": context["parameters"], "lifespan": 3}]
@@ -484,7 +489,7 @@ def makeResponse2(req):
 		dish = findContext(result["contexts"], "user_mentions_taste")["parameters"]["dish"].encode('utf-8')
 		flavor = findContext(result["contexts"], "user_mentions_taste")["parameters"]["flavor"].encode('utf-8')
 		client = MongoClient()
-		contextOut = {"name": "user_asks4_restaurants_withTaste", 
+		contextOut = {"name": "user_asks4_restaurants_withTaste",
 		"parameters": {
 			"taste": taste,
 			"dish": dish,
@@ -519,7 +524,29 @@ def makeResponse2(req):
 				speech = "哎呀，我不知道这是哪家店哎！过几天再来问问看呢。"
 		else:
 			speech = "你在说什么呀？"
-			
+
+    if action == 'query.restaurant.discount':
+        restaurant = parameters['restaurant_chinese']
+        if not restaurant == "":
+            mysql = Mysql()
+			mysql.connect(mysql_config)
+			print restaurant
+			results = mysql.query("SELECT * FROM Restaurants WHERE name_en = '%s'" % (restaurant), restaurant_schema)
+			if len(results) >= 1:
+			    restaurant_id = results[0]['id']
+                restaurant_name = "%s (%s)" % (results[0]['name_cn'], results[0]['name_en'])
+                results = mysql.query("SELECT * FROM DiscountInfo WHERE restaurant_id = '%s'" % (restaurant_id), discount_info_schema)
+                if len(results) >= 1:
+                    speech = "我找到%s的一些优惠信息如下：\n" % restaurant_name
+                    for index in range(len(results))
+                        speech += "%d)%s~%s %s\n" % (index, results[index]['gmt_start'], results[index]['gmt_end'], results[index]['discount_content'])
+                else:
+                    speech = "暂时没有[%s]餐厅的优惠信息哦~" % (restaurant_name)
+            else:
+                speech = "哎呀，我不知道这是哪家店哎！过几天再来问问看呢。"
+        else:
+            speech = "你在说什么呀？"
+
 	if action == 'query.restaurants':
 		if result.has_key("contexts"): res["contextOut"] = clearContexts(result.get("contexts"))
 		if not ((parameters["taste"] == "" and parameters["dish"] == "" and parameters["flavor"] == "")):
@@ -543,7 +570,7 @@ def makeResponse2(req):
 				res["contextOut"].extend(contextOut)
 			else:
 				res["contextOut"] = {"contextOut": contextOut}
-		else: 
+		else:
 			speech = answers_query_restaurants[random.randint(0, len(answers_query_restaurants) - 1)]
 			contextOut = [{"name": "user_asks4_restaurantsrec", "parameters": {
 			"taste.original": "",
@@ -579,7 +606,7 @@ def makeResponse2(req):
 		LngA = float(location['longitude'])
 		#print LatA
 		#print LngA
-		print "User %s is at: %s" % (str(user_id), str(location)) 
+		print "User %s is at: %s" % (str(user_id), str(location))
 		client.close()
 		speech, res['contextOut'] = getRestaurants(LatA=LatA, LngA=LngA, contexts=result.get("contexts"))
 
@@ -612,8 +639,8 @@ def makeResponse2(req):
 				LatA = context['parameters']['location']['location']['lat']
 				LngA = context['parameters']['location']['location']['lng']
 				break
-		speech, res['contextOut'] = getRestaurants(LatA=LatA, LngA=LngA, contexts=result.get("contexts"), 
-			formatted_address=context['parameters']['location']['formatted_address'], 
+		speech, res['contextOut'] = getRestaurants(LatA=LatA, LngA=LngA, contexts=result.get("contexts"),
+			formatted_address=context['parameters']['location']['formatted_address'],
 			location_original=context['parameters']['location.original'])
 
 	if action == 'query.restaurants.next':
@@ -622,7 +649,7 @@ def makeResponse2(req):
 		current = int(context["parameters"]["current"]) + 1
 		user_location = context["parameters"]["user_location"]
 		formatted_address = user_location["location"]["formatted_address"]
-		if formatted_address != "": 
+		if formatted_address != "":
 			addr = "（%s）" % (formatted_address)
 		else:
 			addr = ""
@@ -664,7 +691,7 @@ def makeResponse2(req):
 
 			# _distance = distance(LatA, LngA, LatB, LngB)
 			speech = generateRecommendationAnswer(lists[current], user_location, answers_query_restaurants_next[1])
-			# speech = answers_query_restaurants_next[1] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])	
+			# speech = answers_query_restaurants_next[1] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
 
 	if action == 'query.restaurants.moreInformation':
 		context = findContext(result["contexts"], "restaurants_recommended")
@@ -694,7 +721,7 @@ def makeResponse2(req):
 		if db.UserLocation.find({"user_id": user_id}).count() >= 1:
 			speech = answers_query_restaurants_withoutTaste[1]
 		else:
-			speech = answers_query_restaurants_withoutTaste[0] 
+			speech = answers_query_restaurants_withoutTaste[0]
 		client.close()
                 res["contextOut"] = clearContexts(result.get("contexts"))
 		contextOut = [{"name": "user_asks4_restaurants_withtaste", "parameters": {
@@ -768,7 +795,7 @@ def makeResponse(req):
 			speech = "You have successfully registered! Welcome, I am now your home assistant! What Can I do for you?"
 		else:
 			speech = "Sorry, I meet some errors. Please try again later!"
-			
+
 	if action == "action.openfrontdoor":
 		print("Open Front Door!")
 		content = {
@@ -860,7 +887,7 @@ def makeResponse(req):
 			res["contextOut"] = [{"name":"register", "lifespan":2}]
 		else:
 			speech = "Sorry, I meet some errors. Please try again later!"
-		
+
 	if action == "status.all":
 		print("Check current status")
 		content = {
@@ -992,4 +1019,4 @@ if __name__ == '__main__':
 
     print "Starting app on port %d" % port
 
-    app.run(debug=False, port=port, host='0.0.0.0')
+    app.run(debug=True, port=port, host='0.0.0.0')
