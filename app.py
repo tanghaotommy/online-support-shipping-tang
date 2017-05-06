@@ -414,7 +414,8 @@ def makeResponse2(req):
 	parameters = result.get("parameters")
 	res = {}
 	print "Action: ", action
-	print "Received Contexts: ", result["contexts"]
+        print "User syas:", req.get("result").get("resolvedQuery")
+	#print "Received Contexts: ", result["contexts"]
         speech = '出错啦！！！'
 
 	if action == 'query.restaurants.closer':
@@ -720,10 +721,10 @@ def makeResponse2(req):
 		speech = "<a href='http://maps.google.com/maps/?q=34.0800231,-118.1026794'>a place</a>"
 
 	print("Response: " + str(speech))
-        if res.has_key("contextOut"):
-	    print("Respond contexts: " + str(res["contextOut"]))
-        else:
-            print("Respond without contexts!")
+        #if res.has_key("contextOut"):
+	#    print("Respond contexts: " + str(res["contextOut"]))
+        #else:
+        #    print("Respond without contexts!")
         res["speech"] = speech
 	res["displayText"] = speech
 	res["source"] = "shokse-restaurants-recommendation"
