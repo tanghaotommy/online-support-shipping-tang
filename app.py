@@ -537,27 +537,33 @@ def makeResponse2(req):
 		else:
 			speech = "你在说什么呀？"
 
-    	if action == 'query.restaurant.discount':
-        	restaurant = parameters['restaurant_chinese']
-        	if not restaurant == "":
-            		mysql = Mysql()
+    # 匹配为查询优惠的意图
+	if action == 'query.restaurant.discount':
+		# 根据餐馆名查询id
+		restaurant = parameters['restaurant_chinese']
+		if not restaurant == "":
+			mysql = Mysql()
+			# 查询mysql数据库
 			mysql.connect(mysql_config)
 			print restaurant
 			results = mysql.query("SELECT * FROM Restaurants WHERE name_en = '%s'" % (restaurant), restaurant_schema)
+			# 查询到此餐馆名
 			if len(results) >= 1:
 				restaurant_id = results[0]['id']
-               			restaurant_name = "%s (%s)" % (results[0]['name_cn'], results[0]['name_en'])
-                		results = mysql.query("SELECT * FROM DiscountInfo WHERE restaurant_id = '%s'" % (restaurant_id), discount_info_schema)
-                		if len(results) >= 1:
-                    			speech = "我找到%s的一些优惠信息如下：\n" % restaurant_name
-                    			for index in range(len(results)):
-                        			speech += "%d)%s~%s %s\n" % (index, results[index]['gmt_start'], results[index]['gmt_end'], results[index]['discount_content'])
-                		else:
-                    			speech = "暂时没有[%s]餐厅的优惠信息哦~" % (restaurant_name)
-            		else:
-                		speech = "哎呀，我不知道这是哪家店哎！过几天再来问问看呢。"
-        	else:
-            		speech = "你在说什么呀？"
+				restaurant_name = "%s (%s)" % (results[0]['name_cn'], results[0]['name_en'])
+				# 使用此餐馆id查询优惠信息
+				results = mysql.query("SELECT * FROM DiscountInfo WHERE restaurant_id = '%s'" % (restaurant_id), discount_info_schema)
+				if len(results) >= 1:
+					# 整理优惠信息回复
+					speech = "我找到%s的一些优惠信息如下：\n" % restaurant_name
+					for index in range(len(results)):
+						speech += "%d)%s~%s %s\n" % (index, results[index]['gmt_start'], results[index]['gmt_end'], results[index]['discount_content'])
+				else:
+					speech = "暂时没有[%s]餐厅的优惠信息哦~" % (restaurant_name)
+			else:
+				speech = "哎呀，我不知道这是哪家店哎！过几天再来问问看呢。"
+		else:
+			speech = "你在说什么呀？"
 
 	if action == 'query.restaurants':
 		if result.has_key("contexts"): res["contextOut"] = clearContexts(result.get("contexts"))
