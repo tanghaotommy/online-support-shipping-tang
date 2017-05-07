@@ -216,7 +216,7 @@ def restaurantsRec():
 
     client = MongoClient()
     db = client.wechat
-    db.UserDialog.insert_one({"user_id": req.get("sessionId"), "timestamp": time.time(), "req": input, "resp": output})
+    db.UserDialog.insert_one({"user_id": req.get("sessionId"), "timestamp": time.time(), "action": req.get("result").get("action"), "req": input, "resp": output})
     client.close()
 
     res = json.dumps(res, indent=4)
@@ -537,6 +537,23 @@ def makeResponse2(req):
 		else:
 			speech = "你在说什么呀？"
 
+	# 查询上次推荐的餐馆
+	if action == 'query.restaurant.last':
+		client = MongoClient()
+		db = client.wechat
+		last_recommend = db.UserConfirmedHistory.find_one({"user_id": user_id})
+		speech = "Hello客官你来啦(づ￣3￣)づ╭❤～\n今天想试一试哪种风格的美食呢？"
+		if last_recommend != None:
+			restaurant_id = last_recommend.get("restaurant_id")
+			mysql = Mysql()
+			mysql.connect(mysql_config)
+			results = mysql.query("SELECT * FROM Restaurants WHERE id = '%d' limit 1" % (restaurant_id), restaurant_schema)
+			if len(results) >= 1:
+				restaurant_name = "%s (%s)" % (results[0]['name_cn'], results[0]['name_en'])
+				speech = "上次为您推荐的%s还要再试试吗？" % (restaurant_name)
+			mysql.close()
+		client.close()
+
     # 匹配为查询优惠的意图
 	if action == 'query.restaurant.discount':
 		# 根据餐馆名查询id
@@ -562,6 +579,7 @@ def makeResponse2(req):
 					speech = "暂时没有[%s]餐厅的优惠信息哦~" % (restaurant_name)
 			else:
 				speech = "哎呀，我不知道这是哪家店哎！过几天再来问问看呢。"
+			mysql.close()
 		else:
 			speech = "你在说什么呀？"
 
