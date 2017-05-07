@@ -216,7 +216,7 @@ def restaurantsRec():
 
     client = MongoClient()
     db = client.wechat
-    db.UserDialog.insert_one({"user_id": req['user_id'], "timestamp": time.time(), "req": input, "resp": output})
+    db.UserDialog.insert_one({"user_id": req.get("sessionId"), "timestamp": time.time(), "req": input, "resp": output})
     client.close()
 
     res = json.dumps(res, indent=4)
