@@ -203,10 +203,22 @@ def check_location():
 def restaurantsRec():
     req = request.get_json(silent=True, force=True)
 
+    input = req.get("result").get("resolvedQuery")
+
     print("Request received from Api.ai in restaurantsRec")
     #print(json.dumps(req, indent=4))
 
     res = makeResponse2(req)
+
+    output = res['displayText']
+
+    print("store msg into mongodb, req=%s, resp=%s" % (input, output))
+
+    client = MongoClient()
+    db = client.wechat
+    db.UserDialog.insert_one({"user_id": req['user_id'], "timestamp": time.time(), "req": input, "resp": output})
+    client.close()
+
     res = json.dumps(res, indent=4)
  	#print(res)
 
