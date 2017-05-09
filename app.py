@@ -63,7 +63,7 @@ answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。招
 
 answers_query_restaurants_show = ['我觉得%s（%s）很好哦。招牌菜是%s。\n距离您现在的位置%s有%skm。%s\n营业时间是%s哦！\n不知道您对这家可还中意呀?[Rose][Rose][Rose]']
 
-answers_query_restaurants_last_show = ['%s的招牌菜是%s。\n距离您现在的位置%s有%skm。%s\n营业时间是%s哦！[Rose][Rose][Rose]']
+answers_query_restaurants_last_show = ['%s的招牌菜是%s。\n距离您现在的位置%s有%skm。\n营业时间是%s哦！[Rose][Rose][Rose]']
 
 answers_query_restaurants_moreInformation = ["哈哈~您喜欢就太棒啦！这家餐厅的地址是%s。\n联系电话是%s\nBTW, 悄悄说一句，这家餐厅人均消费是$%s左右～\n那我这次的推荐就结束啦~温馨小提示，记得照顾好同行的小伙伴，酒后不要开车。祝您出行安全、用餐愉快哦O(∩_∩)O[Chuckle][Chuckle][Chuckle]"]
 
@@ -706,12 +706,13 @@ def makeResponse2(req):
 													   formatted_address=context['parameters']['location']['formatted_address'],
 													   location_original=context['parameters']['location.original'])
 		else:
+                        print last_recommend_context
 			mysql = Mysql()
 			mysql.connect(mysql_config)
-			results = mysql.query("SELECT * FROM Restaurants WHERE id = '%d' limit 1" % (last_recommend_context['last_recommend_id']),
+			results = mysql.query("SELECT * FROM Restaurants WHERE id = '%d' limit 1" % (int(float(last_recommend_context["last_recommend_id"].encode('utf-8')))),
 								  restaurant_schema)
 			if len(results) >= 1:
-				dist = distance(LatA, LngA, results[0]['latitude'], results[0]['longtitude'])
+				dist = distance(LatA, LngA, results[0]['latitude'], results[0]['longitude'])
 				speech = answers_query_restaurants_last_show[0] % (last_recommend_context['last_recommend_name'], results[0]['signature'], context['parameters']['location.original'], dist, results[0]['hour'])
 			mysql.close()
 
