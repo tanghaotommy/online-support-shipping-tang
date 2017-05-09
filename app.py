@@ -542,6 +542,7 @@ def makeResponse2(req):
 		client = MongoClient()
 		db = client.wechat
 		last_recommend = db.UserConfirmedHistory.find_one({"user_id": user_id})
+                print last_recommend
 		speech = "Hello客官你来啦(づ￣3￣)づ╭❤～\n今天想试一试哪种风格的美食呢？"
 		if last_recommend != None:
 			restaurant_id = last_recommend.get("restaurant_id")
@@ -551,8 +552,26 @@ def makeResponse2(req):
 			if len(results) >= 1:
 				restaurant_name = "%s (%s)" % (results[0]['name_cn'], results[0]['name_en'])
 				speech = "上次为您推荐的%s还要再试试吗？" % (restaurant_name)
+                                context = {"parameters": {"last_recommend_id": results[0]['id'], "last_recommend_name": restaurant_name}}
+                                contextOut = [{"name": "restaurants_recommended_last", "parameters": context["parameters"], "lifespan": 3}]
+                                res["contextOut"] = clearContexts(result.get("contexts"))
+                                res["contextOut"].extend(contextOut)
 			mysql.close()
 		client.close()
+
+        if action == 'query.restaurant.last.positive':
+            client = MongoClient()
+            print parameters
+            db = client.wechat
+            if db.UserLocation.find({"user_id": user_id}).count() >= 1:
+                speech = answers_query_restaurants_taste[1] % (parameters["last_recommend_name"].encode('utf-8'))
+            else:
+                speech = answers_query_restaurants_taste[0] % (parameters["last_recommend_name"].encode('utf-8'))
+            client.close()
+
+        if action == 'query.restaurant.last.locationOk':
+            speech = "好的，容我为您计算一下距离哦 ~"
+
 
     # 匹配为查询优惠的意图
 	if action == 'query.restaurant.discount':
