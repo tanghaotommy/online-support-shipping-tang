@@ -63,6 +63,8 @@ answers_query_restaurants_closer = ['这家叫%s（%s）的稍微近一些。招
 
 answers_query_restaurants_show = ['我觉得%s（%s）很好哦。招牌菜是%s。\n距离您现在的位置%s有%skm。%s\n营业时间是%s哦！\n不知道您对这家可还中意呀?[Rose][Rose][Rose]']
 
+answers_query_restaurants_last_show = ['%s的招牌菜是%s。\n距离您现在的位置%s有%skm。%s\n营业时间是%s哦！[Rose][Rose][Rose]']
+
 answers_query_restaurants_moreInformation = ["哈哈~您喜欢就太棒啦！这家餐厅的地址是%s。\n联系电话是%s\nBTW, 悄悄说一句，这家餐厅人均消费是$%s左右～\n那我这次的推荐就结束啦~温馨小提示，记得照顾好同行的小伙伴，酒后不要开车。祝您出行安全、用餐愉快哦O(∩_∩)O[Chuckle][Chuckle][Chuckle]"]
 
 answers_query_restaurants_next = ['好嘞！我马上给您换另一家！\n' + answers_query_restaurants_show[0], "我找不到更多的餐厅啦，只能从头再开始一遍咯！\n" + answers_query_restaurants_show[0]]
@@ -694,9 +696,24 @@ def makeResponse2(req):
 				LatA = context['parameters']['location']['location']['lat']
 				LngA = context['parameters']['location']['location']['lng']
 				break
-		speech, res['contextOut'] = getRestaurants(LatA=LatA, LngA=LngA, contexts=result.get("contexts"),
-			formatted_address=context['parameters']['location']['formatted_address'],
-			location_original=context['parameters']['location.original'])
+
+		for context in result.get('contexts'):
+			if context['name'] == 'restaurants_recommended_last':
+				last_recommend_context = context['parameters']
+
+		if last_recommend_context == None:
+			speech, res['contextOut'] = getRestaurants(LatA=LatA, LngA=LngA, contexts=result.get("contexts"),
+													   formatted_address=context['parameters']['location']['formatted_address'],
+													   location_original=context['parameters']['location.original'])
+		else:
+			mysql = Mysql()
+			mysql.connect(mysql_config)
+			results = mysql.query("SELECT * FROM Restaurants WHERE id = '%d' limit 1" % (last_recommend_context['last_recommend_id']),
+								  restaurant_schema)
+			if len(results) >= 1:
+				dist = distance(LatA, LngA, results[0]['latitude'], results[0]['longtitude'])
+				speech = answers_query_restaurants_last_show[0] % (last_recommend_context['last_recommend_name'], results[0]['signature'], context['parameters']['location.original'], dist, results[0]['hour'])
+			mysql.close()
 
 	if action == 'query.restaurants.next':
 		context = findContext(result["contexts"], "restaurants_recommended")
