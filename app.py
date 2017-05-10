@@ -714,6 +714,7 @@ def makeResponse2(req):
 			if len(results) >= 1:
 				dist = distance(LatA, LngA, results[0]['latitude'], results[0]['longitude'])
 				speech = answers_query_restaurants_last_show[0] % (last_recommend_context['last_recommend_name'], results[0]['signature'], context['parameters']['location.original'], dist, results[0]['hour'])
+                                res["contextOut"] = clearContexts(result.get("contexts"))
 			mysql.close()
 
 	if action == 'query.restaurants.next':
