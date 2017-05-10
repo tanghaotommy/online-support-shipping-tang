@@ -173,7 +173,6 @@ def webhook():
     r.headers['Content-Type'] = 'application/json'
     return r
 
-@app.route('/smarthome', methods=['POST'])
 def smarthome():
     req = request.get_json(silent=True, force=True)
 
@@ -556,7 +555,7 @@ def makeResponse2(req):
 		client = MongoClient()
 		db = client.wechat
 		last_recommend = db.UserConfirmedHistory.find_one({"user_id": user_id})
-                print last_recommend
+		print last_recommend
 		speech = "Hello客官你来啦(づ￣3￣)づ╭❤～\n今天想试一试哪种风格的美食呢？"
 		if last_recommend != None:
 			restaurant_id = last_recommend.get("restaurant_id")
@@ -565,29 +564,29 @@ def makeResponse2(req):
 			results = mysql.query("SELECT * FROM Restaurants WHERE id = '%d' limit 1" % (restaurant_id), restaurant_schema)
 			if len(results) >= 1:
 				restaurant_name = "%s (%s)" % (results[0]['name_cn'], results[0]['name_en'])
-				speech = "还想再试一试%s吗？" % (restaurant_name)
-                                context = {"parameters": {"last_recommend_id": results[0]['id'], "last_recommend_name": restaurant_name}}
-                                contextOut = [{"name": "restaurants_recommended_last", "parameters": context["parameters"], "lifespan": 3}]
-                                res["contextOut"] = clearContexts(result.get("contexts"))
-                                res["contextOut"].extend(contextOut)
+				speech = "还想再试一试%s吗？" % (results[0]['type'])
+				context = {"parameters": {"last_recommend_id": results[0]['id'], "last_recommend_name": restaurant_name}}
+				contextOut = [{"name": "restaurants_recommended_last", "parameters": context["parameters"], "lifespan": 3}]
+				res["contextOut"] = clearContexts(result.get("contexts"))
+				res["contextOut"].extend(contextOut)
 			mysql.close()
 		client.close()
 
-        if action == 'query.restaurant.last.positive':
-            client = MongoClient()
-            print parameters
-            db = client.wechat
-            if db.UserLocation.find({"user_id": user_id}).count() >= 1:
-                speech = answers_query_restaurants_taste[1] % (parameters["last_recommend_name"].encode('utf-8'))
-            else:
-                speech = answers_query_restaurants_taste[0] % (parameters["last_recommend_name"].encode('utf-8'))
-            client.close()
+	if action == 'query.restaurant.last.positive':
+		client = MongoClient()
+		print parameters
+		db = client.wechat
+		if db.UserLocation.find({"user_id": user_id}).count() >= 1:
+			speech = answers_query_restaurants_taste[1] % (parameters["last_recommend_name"].encode('utf-8'))
+		else:
+			speech = answers_query_restaurants_taste[0] % (parameters["last_recommend_name"].encode('utf-8'))
+		client.close()
 
-        if action == 'query.restaurant.last.locationOk':
-            speech = "好的，容我为您计算一下距离哦 ~"
+	if action == 'query.restaurant.last.locationOk':
+			speech = "好的，容我为您计算一下距离哦 ~"
 
 
-    # 匹配为查询优惠的意图
+	# 匹配为查询优惠的意图
 	if action == 'query.restaurant.discount':
 		# 根据餐馆名查询id
 		restaurant = parameters['restaurant_chinese']
@@ -627,14 +626,14 @@ def makeResponse2(req):
 				speech = answers_query_restaurants_taste[0] % (parameters.get('taste') + parameters.get('flavor') + parameters.get('dish'))
 			client.close()
 			contextOut = [{"name": "user_asks4_restaurants_withtaste", "parameters": {
-          "taste.original": "",
-          "taste": parameters["taste"],
-          "dish": parameters["dish"],
-          "dish.original": "",
-          "flavor": parameters["flavor"],
-          "flavor.original": ""
-        },
-        "lifespan": 5}]
+			"taste.original": "",
+			"taste": parameters["taste"],
+			"dish": parameters["dish"],
+			"dish.original": "",
+			"flavor": parameters["flavor"],
+			"flavor.original": ""
+			},
+			"lifespan": 5}]
 			if not (res["contextOut"] == ""):
 				res["contextOut"].extend(contextOut)
 			else:
@@ -725,7 +724,7 @@ def makeResponse2(req):
 			if len(results) >= 1:
 				dist = distance(LatA, LngA, results[0]['latitude'], results[0]['longitude'])
 				speech = answers_query_restaurants_last_show[0] % (last_recommend_context['last_recommend_name'], results[0]['signature'], context['parameters']['location.original'], dist, results[0]['hour'])
-                res["contextOut"] = clearContexts(result.get("contexts"))
+				res["contextOut"] = clearContexts(result.get("contexts"))
 			mysql.close()
 
 	if action == 'query.restaurants.next':
