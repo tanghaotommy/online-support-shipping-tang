@@ -42,6 +42,8 @@ flavor_taste = {
 	'甜的': '上海菜'
 }
 
+answers_query_unknown = ['你是想让我帮你推荐中餐馆嘛？', '你是想吃饭了嘛？', '你是饿了嘛？', '嘿嘿，你一定是饿了，对不对？', '我猜你一定是想吃东西了，我猜的对不对呀？', '一看你就是想让我给你推荐好吃的中餐馆，是不是呀？']
+
 answers_query_restaurants = ['Hello客官你来啦(づ￣3￣)づ╭❤～\n今天想试一试哪种风格的美食呢？']
 
 answers_query_restaurants_location = ['好的，请稍等！正在搜寻中！']
@@ -488,6 +490,16 @@ def makeResponse2(req):
 			speech = generateRecommendationAnswer(lists[current], user_location, answers_query_restaurants_closer[1])
 			# speech = answers_query_restaurants_closer[1] % (item['name_cn'], item['name_en'], item['signature'], addr, str(_distance), item['hour'])
 
+	if action == 'input.unknown':
+		client = MongoClient()
+		db = client.wechat
+		last_recommend = db.UserConfirmedHistory.find_one({"user_id": user_id})
+		print last_recommend
+		speech = answers_query_unknown[random.randint(0, len(answers_query_unknown) - 1)] % ()
+		if last_recommend != None:
+			speech = '欢迎回来 ~ %s' % (speech)
+		client.close()
+
 
 	if action == 'query.taste':
 		taste = parameters["taste"].encode('utf-8')
@@ -706,7 +718,6 @@ def makeResponse2(req):
 													   formatted_address=context['parameters']['location']['formatted_address'],
 													   location_original=context['parameters']['location.original'])
 		else:
-                        print last_recommend_context
 			mysql = Mysql()
 			mysql.connect(mysql_config)
 			results = mysql.query("SELECT * FROM Restaurants WHERE id = '%d' limit 1" % (int(float(last_recommend_context["last_recommend_id"].encode('utf-8')))),
