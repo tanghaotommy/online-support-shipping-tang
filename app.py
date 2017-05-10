@@ -563,9 +563,8 @@ def makeResponse2(req):
 			mysql.connect(mysql_config)
 			results = mysql.query("SELECT * FROM Restaurants WHERE id = '%d' limit 1" % (restaurant_id), restaurant_schema)
 			if len(results) >= 1:
-				restaurant_name = "%s (%s)" % (results[0]['name_cn'], results[0]['name_en'])
 				speech = "还想再试一试%s吗？" % (results[0]['type'])
-				context = {"parameters": {"last_recommend_id": results[0]['id'], "last_recommend_name": restaurant_name}}
+				context = {"parameters": {"last_recommend_id": results[0]['id'], "last_recommend_taste": results[0]['type']}}
 				contextOut = [{"name": "restaurants_recommended_last", "parameters": context["parameters"], "lifespan": 3}]
 				res["contextOut"] = clearContexts(result.get("contexts"))
 				res["contextOut"].extend(contextOut)
@@ -577,9 +576,10 @@ def makeResponse2(req):
 		print parameters
 		db = client.wechat
 		if db.UserLocation.find({"user_id": user_id}).count() >= 1:
-			speech = answers_query_restaurants_taste[1] % (parameters["last_recommend_name"].encode('utf-8'))
+			speech = answers_query_restaurants_taste[1] % (parameters["last_recommend_taste"].encode('utf-8'))
 		else:
-			speech = answers_query_restaurants_taste[0] % (parameters["last_recommend_name"].encode('utf-8'))
+			speech = answers_query_restaurants_taste[0] % (parameters["last_recommend_taste"].encode('utf-8'))
+		res['followupEvent'] = {"name": "E_TASTE"}
 		client.close()
 
 	if action == 'query.restaurant.last.locationOk':
@@ -711,6 +711,8 @@ def makeResponse2(req):
 		for context in result.get('contexts'):
 			if context['name'] == 'restaurants_recommended_last':
 				last_recommend_context = context['parameters']
+
+		last_recommend_context = None
 
 		if last_recommend_context == None:
 			speech, res['contextOut'] = getRestaurants(LatA=LatA, LngA=LngA, contexts=result.get("contexts"),
