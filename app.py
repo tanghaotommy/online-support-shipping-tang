@@ -565,7 +565,7 @@ def makeResponse2(req):
 			results = mysql.query("SELECT * FROM Restaurants WHERE id = '%d' limit 1" % (restaurant_id), restaurant_schema)
 			if len(results) >= 1:
 				restaurant_name = "%s (%s)" % (results[0]['name_cn'], results[0]['name_en'])
-				speech = "上次为您推荐的%s还要再试试吗？" % (restaurant_name)
+				speech = "还想再试一试%s吗？" % (restaurant_name)
                                 context = {"parameters": {"last_recommend_id": results[0]['id'], "last_recommend_name": restaurant_name}}
                                 contextOut = [{"name": "restaurants_recommended_last", "parameters": context["parameters"], "lifespan": 3}]
                                 res["contextOut"] = clearContexts(result.get("contexts"))
