@@ -579,7 +579,10 @@ def makeResponse2(req):
 			speech = answers_query_restaurants_taste[1] % (parameters["last_recommend_taste"].encode('utf-8'))
 		else:
 			speech = answers_query_restaurants_taste[0] % (parameters["last_recommend_taste"].encode('utf-8'))
-		res['followupEvent'] = {"name": "E_TASTE"}
+
+                contextOut = [{"name": "user_asks4_restaurants_withtaste", "parameters": {"taste": parameters["last_recommend_taste"].encode('utf-8'), "dish": "", "flavor":""}, "lifespan": 3}]
+                res["contextOut"] = contextOut
+
 		client.close()
 
 	if action == 'query.restaurant.last.locationOk':
