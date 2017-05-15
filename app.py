@@ -530,6 +530,11 @@ def makeResponse2(req):
 		client.close()
 
 	if action == 'query.restaurant':
+		askLocation = findContext(result["contexts"], "user_asks4_restaurants_withTaste")
+		if askLocation != None:
+			req['result']['action'] = "query.restaurants.unknownLocation"
+			return makeResponse2(req);
+
 		restaurant = parameters['restaurant_chinese']
 		if not restaurant == "":
 			mysql = Mysql()
