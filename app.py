@@ -384,7 +384,7 @@ def getRestaurants(contexts, LatA, LngA, location_original = "", formatted_addre
 				# 	addr, str(restaurants[sorted_key_list[0]]['distance']), item['hour'])
 			else:
 				contextOut = clearContexts(contexts)
-				speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"
+				speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。(我现在只能找到Log Angeles 附近的哦)"
 		else:
 			contextOut = clearContexts(contexts)
 			speech = "哎呀，对不起，在你附近我找不到符合条件的餐馆。"
@@ -603,7 +603,7 @@ def makeResponse2(req):
 			# 查询mysql数据库
 			mysql.connect(mysql_config)
 			print restaurant
-			results = mysql.query("SELECT * FROM Restaurants WHERE name_en = '%s'" % (restaurant), restaurant_schema)
+			results = mysql.query("SELECT * FROM Restaurants  join DiscountInfo on Restaurants.id = DiscountInfo.restaurant_id WHERE name_en = '%s'" % (restaurant), restaurant_schema)
 			# 查询到此餐馆名
 			if len(results) >= 1:
 				restaurant_id = results[0]['id']
